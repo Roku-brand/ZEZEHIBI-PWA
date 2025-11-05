@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>オフライン — 記録アプリ</title>
+  <meta name="theme-color" content="#5b8def" />
+  <style>
+    :root{
+      --bg:#f6f7fb; --panel:#fff; --text:#1f2328; --muted:#6b7280; --accent:#5b8def; --line:#e5e7eb;
+      --safe-top: env(safe-area-inset-top); --safe-right: env(safe-area-inset-right);
+      --safe-bottom: env(safe-area-inset-bottom); --safe-left: env(safe-area-inset-left);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans JP",sans-serif}
+    main{min-height:100dvh;display:grid;place-items:center;padding:24px}
+    .card{max-width:min(720px,92vw);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,.06)}
+    h1{margin:0 0 6px;font-size:22px}
+    p{margin:8px 0;color:var(--muted);line-height:1.7}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    button{font:inherit;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 14px;cursor:pointer}
+    .primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+    .muted{color:var(--muted)}
+    .badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:#eef2ff;color:#334155;border:1px solid #c7d7ff}
+    .hint{font-size:12px;color:var(--muted);margin-top:10px}
+    .hero{font-size:42px;line-height:1;margin-bottom:8px}
+    .list{margin:10px 0 0;padding-left:1.1em;color:#555}
+    .list li{margin:.2em 0}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="card" role="alert">
+      <div class="hero">📴</div>
+      <h1>オフラインです</h1>
+      <p>ネットワークに接続できませんでした。接続が復帰すると自動でホームに戻ります。</p>
+      <p class="muted">記録アプリは PWA として<strong>オフラインでも起動</strong>できますが、最新データの取得や外部リンクは接続が必要です。</p>
+
+      <div class="row">
+        <button id="retry" class="primary">再読み込み</button>
+        <button id="home">ホームを開く（キャッシュ）</button>
+      </div>
+
+      <p class="hint">
+        状態：<span class="badge" id="status">offline</span>
+        <span id="lastSyncWrap" style="margin-left:8px;display:none">／ 最終同期 <span id="lastSync" class="badge"></span></span>
+      </p>
+
+      <ul class="list">
+        <li>Wi-Fi / モバイルデータの状態を確認してください。</li>
+        <li>VPNや機内モードが原因の場合があります。</li>
+        <li>復帰後は自動で <code>index.html</code> へ戻ります。</li>
+      </ul>
+    </div>
+  </main>
+
+  <script>
+    // 最終同期の表示（任意）：app側で保存していれば表示
+    try{
+      const t = localStorage.getItem('journal.lastSyncAt');
+      if (t){
+        const d = new Date(Number(t));
+        document.getElementById('lastSync').textContent =
+          `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        document.getElementById('lastSyncWrap').style.display = 'inline';
+      }
+    }catch(_){}
+
+    const statusEl = document.getElementById('status');
+    const updateBadge = () => {
+      const on = navigator.onLine;
+      statusEl.textContent = on ? 'online' : 'offline';
+      // 復帰したら自動でホームへ
+      if (on) location.replace('./index.html');
+    };
+    updateBadge();
+
+    window.addEventListener('online', updateBadge);
+    window.addEventListener('offline', updateBadge);
+
+    document.getElementById('retry').addEventListener('click', () => {
+      // ネット優先で再取得を試みる
+      location.reload();
+    });
+    document.getElementById('home').addEventListener('click', () => {
+      // キャッシュ済み index.html を開く（SWがあればキャッシュから返る）
+      location.href = './index.html';
+    });
+
+    // SW経由で即時更新したい場合のメッセージ（任意）
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage('SKIP_WAITING');
+    }
+  </script>
+</body>
+</html>
