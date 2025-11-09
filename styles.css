@@ -220,3 +220,29 @@ dialog#dlg .modal{ padding:16px; background:#fff }
   background:#eef2ff; color:#334155; border:1px solid #c7d7ff
 }
 hr{ border:0; border-top:1px solid var(--line); margin:10px 0 }
+html,
+body {
+  margin: 0;
+  padding: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* iPhoneで中央に収めるラッパー */
+.app-shell {
+  max-width: 480px;        /* iPhone想定幅 */
+  margin: 0 auto;
+  padding: 8px 10px 16px;
+}
+
+/* カレンダーなどがはみ出さないように */
+.calendar,
+.panel,
+header,
+main {
+  width: 100%;
+}
