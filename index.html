@@ -253,6 +253,34 @@
     </div>
   </dialog>
 
+  <dialog id="settingsDialog" class="modal">
+  <div class="modal">
+    <h3>設定</h3>
+
+    <div class="row">
+      <button id="btnExport" class="primary" type="button">
+        データを書き出す（JSON エクスポート）
+      </button>
+    </div>
+
+    <div class="row">
+      <label class="small">
+        データを読み込む（JSON インポート）
+        <input id="importFile" type="file" accept="application/json">
+      </label>
+    </div>
+
+    <p class="small">
+      ※ブラウザ内（ローカルストレージ）の日記・予定データだけを対象にします。<br>
+      ※ファイルはあなたの端末内で処理され、サーバーには送信されません。
+    </p>
+
+    <div class="row" style="text-align:right">
+      <button id="btnSettingsClose" type="button">閉じる</button>
+    </div>
+  </div>
+</dialog>
+
   <!-- スケジュール調整用モーダル -->
   <dialog id="cModal" class="c-modal">
     <form method="dialog" id="cForm">
@@ -343,5 +371,6 @@
   <script defer src="app.js"></script>
 </body>
 </html>
+
 
 
