@@ -705,3 +705,78 @@ coord.cFindSlots.addEventListener('click', ()=>{
     window.addEventListener('load', ()=> navigator.serviceWorker.register('./sw.js').catch(()=>{}));
   }
 })();
+// ===== 設定ダイアログ =====
+const settingsBtn = document.getElementById('btnSettings');
+const settingsDialog = document.getElementById('settingsDialog');
+const settingsClose = document.getElementById('btnSettingsClose');
+const importInput = document.getElementById('importFile');
+const exportBtn = document.getElementById('btnExport');
+
+if (settingsBtn && settingsDialog) {
+  settingsBtn.addEventListener('click', () => settingsDialog.showModal());
+}
+if (settingsClose && settingsDialog) {
+  settingsClose.addEventListener('click', () => settingsDialog.close());
+}
+
+// ---- データのエクスポート ----
+// ここでは "zz_" または "zezehibi_" で始まる localStorage を対象にする想定。
+// 実際に使っているキー名に合わせて調整してOKです。
+function collectZezehibiData() {
+  const result = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('zz_') || key.startsWith('zezehibi_')) {
+      result[key] = localStorage.getItem(key);
+    }
+  }
+  return result;
+}
+
+if (exportBtn) {
+  exportBtn.addEventListener('click', () => {
+    const data = collectZezehibiData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: 'application/json'
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const today = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `zezehibi-backup-${today}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    alert('バックアップファイルをダウンロードしました。');
+  });
+}
+
+// ---- データのインポート ----
+if (importInput) {
+  importInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const obj = JSON.parse(reader.result);
+        let count = 0;
+        for (const [key, value] of Object.entries(obj)) {
+          if (typeof value === 'string') {
+            localStorage.setItem(key, value);
+            count++;
+          }
+        }
+        alert(`インポート完了：${count} 件のデータを読み込みました。\n画面を再読み込みします。`);
+        location.reload();
+      } catch (err) {
+        console.error(err);
+        alert('インポートに失敗しました。JSONファイルを確認してください。');
+      }
+    };
+    reader.readAsText(file, 'utf-8');
+  });
+}
+
