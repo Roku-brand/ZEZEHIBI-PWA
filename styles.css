@@ -1,19 +1,18 @@
 :root {
-  --bg: #f5f6fa;
-  --bg-soft: #ffffff;
-  --accent: #2f70ff;
-  --accent-soft: #dbe6ff;
-  --accent-text: #174099;
-  --text-main: #222;
-  --text-weak: #777;
-  --border-soft: #e0e4ee;
-  --today: #ffeb99;
-  --radius-xl: 26px;
-  --radius-md: 14px;
-  --shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.10);
-  --nav-height: 80px; /* ← 下タブ大きく */
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", -system-ui, sans-serif;
+  --bg-main: #05070a;
+  --bg-card: #11141a;
+  --bg-card-soft: #181c24;
+  --accent: #3fa7ff;
+  --accent-soft: #2c7dd6;
+  --text-main: #ffffff;
+  --text-sub: #9aa0b5;
+  --danger: #ff5c7a;
+  --radius-card: 18px;
+  --shadow-soft: 0 10px 25px rgba(0, 0, 0, 0.55);
+  --font: -apple-system, system-ui, -system-ui, BlinkMacSystemFont, "SF Pro JP", sans-serif;
 }
+
+/* 基本 */
 
 *,
 *::before,
@@ -25,128 +24,115 @@ html,
 body {
   margin: 0;
   padding: 0;
+  width: 100%;
   height: 100%;
 }
 
 body {
-  font-family: var(--font-sans);
-  background: radial-gradient(circle at top, #eef3ff 0, #f5f6fa 40%, #eef2ff 100%);
+  font-family: var(--font);
+  background-color: var(--bg-main);
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
 }
 
-/* レイアウト全体 */
-
-.app-shell {
+.app-root {
   min-height: 100vh;
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 0;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
   display: flex;
   flex-direction: column;
 }
 
-/* 上部バー */
+/* ヘッダー */
 
 .top-bar {
+  padding: 10px 14px 4px;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 6px);
   display: flex;
-  justify-content: space-between;
   align-items: flex-end;
-  padding: 14px 16px 6px;
-  gap: 8px;
+  justify-content: space-between;
 }
 
-.today-label {
-  font-size: 13px;
-  color: var(--accent-text);
+.top-month {
+  font-size: 18px;
+  font-weight: 600;
 }
 
-.month-label {
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  color: #111827;
+.top-today {
+  font-size: 12px;
+  color: var(--text-sub);
+  margin-top: 2px;
 }
 
-.icon-btn {
+.fab-mini {
+  width: 34px;
+  height: 34px;
+  border-radius: 17px;
   border: none;
   background: var(--accent);
   color: #fff;
-  width: 32px;
-  height: 32px;
-  border-radius: 14px;
-  display: inline-flex;
+  font-size: 22px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+  box-shadow: var(--shadow-soft);
 }
 
-/* メイン領域 */
+/* メイン */
 
-main {
+.main {
   flex: 1;
-  padding: 0 10px 4px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  padding: 0 8px 8px;
 }
 
-/* タブごとの画面 */
+/* 画面切替 */
 
 .screen {
   display: none;
-  flex-direction: column;
-  gap: 6px;
+  height: 100%;
 }
 
 .screen.active {
-  display: flex;
+  display: block;
 }
 
-/* --- カレンダー画面 --- */
+/* カレンダー */
 
-.calendar-card {
-  background: var(--bg-soft);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-soft);
-  padding: 10px 10px 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-/* 月切り替え行 */
-
-.cal-header {
+.cal-nav-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 2px;
+  gap: 4px;
+  padding: 4px 4px 2px;
 }
 
 .cal-nav-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
   border: none;
-  background: transparent;
-  padding: 4px 4px;
+  background: var(--bg-card-soft);
+  color: var(--text-main);
   font-size: 18px;
-  color: var(--accent-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .cal-month-label {
+  flex: 1;
+  text-align: center;
   font-weight: 600;
-  font-size: 15px;
-  color: #111827;
+  font-size: 16px;
 }
 
-.cal-today-shortcut {
-  margin-left: auto;
-  padding: 4px 8px;
-  font-size: 11px;
+.cal-today-btn {
+  padding: 4px 10px;
   border-radius: 999px;
-  border: 1px solid var(--border-soft);
-  color: var(--accent-text);
-  background: #f9fbff;
+  border: none;
+  font-size: 12px;
+  background: var(--accent-soft);
+  color: #fff;
 }
 
 /* 曜日行 */
@@ -154,221 +140,240 @@ main {
 .cal-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  margin-top: 2px;
-  font-size: 10px;
-  color: var(--text-weak);
+  font-size: 11px;
+  color: var(--text-sub);
+  margin: 2px 2px 0;
 }
 
 .cal-weekdays div {
   text-align: center;
 }
 
-/* 日付マス：隙間ほぼゼロで最大化 */
+.cal-weekdays .sun {
+  color: #ff6b81;
+}
+
+.cal-weekdays .sat {
+  color: #4da3ff;
+}
+
+/* カレンダーグリッド */
 
 .cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-auto-rows: minmax(40px, 1fr);
-  margin-top: 2px;
-  border-radius: 16px;
+  grid-auto-rows: minmax(44px, 1fr);
+  gap: 1px; /* ほぼ隙間なしに見える程度 */
+  margin: 2px 0 4px;
+  background-color: #000;
+  border-radius: 10px;
   overflow: hidden;
-  background: #f3f4fb;
 }
 
-.cal-day {
-  position: relative;
+/* 日セル */
+
+.day-cell {
+  background-color: var(--bg-card);
   padding: 2px 2px 1px;
-  border: 0.5px solid #e2e5f2; /* 日と日の境界線だけ */
-  background: #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-}
-
-/* 日付数字 */
-
-.cal-day-num {
-  font-size: 11px;
-  font-weight: 600;
-  margin-bottom: 1px;
-}
-
-/* 予定タイトル（最大2件くらい） */
-
-.cal-day-labels {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
+  position: relative;
   overflow: hidden;
 }
 
-.cal-label {
-  font-size: 9px;
+.day-cell.other-month {
+  background-color: #090b10;
+  color: #6d7486;
+}
+
+.day-number {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.day-number.today {
+  color: var(--accent);
+}
+
+.day-title {
+  margin-top: 1px;
+  font-size: 8px;
   line-height: 1.2;
-  padding: 0 2px;
-  border-radius: 4px;
-  color: #ffffff;
+  color: #ffd166; /* イベントっぽく視覚化 */
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
 }
 
-/* ラベル色サンプル（app.js側でクラス振る前提でもOK） */
-.cal-label.work { background: #2563eb; }
-.cal-label.life { background: #10b981; }
-.cal-label.fun  { background: #f97316; }
-.cal-label.etc  { background: #6b7280; }
+/* 選択枠 */
 
-.cal-day.today {
-  background: var(--today);
+.day-cell.selected {
+  outline: 1px solid var(--accent);
 }
 
-/* 下部「その日の概要」カード */
+/* 今日の概要 */
 
-.today-summary {
-  margin-top: 4px;
-  padding: 6px 8px;
-  border-radius: var(--radius-md);
-  background: #ffffffcc;
-  border: 1px solid var(--border-soft);
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.today-summary-label {
-  font-size: 10px;
-  color: var(--text-weak);
-}
-
-.today-summary-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--accent-text);
-}
-
-/* --- 日記編集画面など（別画面切り替え用） --- */
-
-.editor-card {
-  background: var(--bg-soft);
-  border-radius: var(--radius-xl);
+.day-summary {
+  margin: 6px 4px;
+  padding: 8px 10px;
+  background: var(--bg-card-soft);
+  border-radius: var(--radius-card);
   box-shadow: var(--shadow-soft);
-  padding: 10px 10px 12px;
+}
+
+.day-summary-date {
+  font-size: 11px;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.day-summary-title {
+  font-size: 13px;
+}
+
+/* 日記画面 */
+
+.entry-header {
+  display: flex;
+  align-items: center;
+  padding: 4px 2px 2px;
+}
+
+.back-btn {
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-size: 13px;
+}
+
+.entry-date-label {
+  margin-left: 8px;
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+.entry-card {
+  margin: 4px 2px 60px;
+  padding: 10px;
+  background: var(--bg-card-soft);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
+}
+
+.field-row {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  margin-bottom: 8px;
 }
 
-.editor-row {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.badge-date {
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--accent-text);
+.field-row label {
   font-size: 11px;
-  font-weight: 600;
+  color: var(--text-sub);
+  margin-bottom: 2px;
 }
 
-input[type="text"],
-input[type="time"],
-textarea,
-select {
+.field-row input,
+.field-row textarea {
   width: 100%;
-  border-radius: 10px;
-  border: 1px solid var(--border-soft);
   padding: 6px 8px;
-  font-size: 12px;
-  font-family: var(--font-sans);
-  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #2b3240;
+  background: #0d1017;
+  color: var(--text-main);
+  font-size: 13px;
 }
 
-textarea {
-  min-height: 90px;
+.field-row textarea {
   resize: vertical;
 }
 
-/* 起床・ご飯ブロック（※app.js側で使う想定） */
+/* 食事行 */
 
-.meal-grid {
+.meal-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  margin-top: 4px;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 6px;
 }
 
-.meal-label {
-  font-size: 9px;
-  color: var(--text-weak);
+.meal-row label {
+  font-size: 10px;
 }
 
-/* --- 下ナビ（タブ） --- */
+/* ボタン */
 
-.bottom-nav {
-  position: sticky;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: var(--nav-height);
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 -4px 18px rgba(15, 23, 42, 0.10);
+.entry-actions {
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  padding-bottom: env(safe-area-inset-bottom);
-  z-index: 20;
+  margin-top: 10px;
 }
 
-.nav-btn {
+.spacer {
   flex: 1;
+}
+
+.btn {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: none;
+  font-size: 12px;
+}
+
+.btn.primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn.ghost {
+  background: transparent;
+  color: var(--danger);
+}
+
+/* 下ナビ */
+
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-bottom: max(env(safe-area-inset-bottom), 6px);
+  padding-top: 4px;
+  display: flex;
+  justify-content: space-around;
+  background: rgba(3, 4, 7, 0.96);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.7);
+}
+
+.tab-btn {
+  flex: 1;
+  border: none;
+  background: none;
+  color: var(--text-sub);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  color: var(--text-weak);
-  font-size: 10px;
-  padding: 10px 0 6px;
+  gap: 2px;
+  padding: 6px 0 2px;
+  font-size: 11px;
 }
 
-.nav-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 17px;
-  background: transparent;
+.tab-icon {
+  font-size: 22px; /* 押しやすい大きさ */
 }
 
-.nav-btn.active {
+.tab-label {
+  line-height: 1;
+}
+
+.tab-btn.active {
   color: var(--accent);
-  font-weight: 600;
 }
 
-.nav-btn.active .nav-icon {
-  background: var(--accent-soft);
-  color: var(--accent-text);
-}
+/* スクロール用 */
 
-/* 小さい端末調整 */
-
-@media (max-width: 360px) {
-  .cal-grid {
-    grid-auto-rows: minmax(36px, 1fr);
-  }
-  .nav-icon {
-    width: 26px;
-    height: 26px;
-    font-size: 16px;
-  }
-  .nav-btn {
-    font-size: 9px;
-  }
+textarea,
+input {
+  -webkit-appearance: none;
 }
