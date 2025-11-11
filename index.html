@@ -2,10 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#020813" />
   <title>是々日々 - 日記 / 予定 / 調整</title>
 
@@ -23,9 +20,7 @@
     <header class="app-header">
       <div>
         <div class="app-title-main">是々日々</div>
-        <div class="app-title-sub">
-          日々を静かに整える、個人用カレンダー＆日記
-        </div>
+        <div class="app-title-sub">日々を静かに整える、個人用カレンダー＆日記</div>
       </div>
       <div class="app-header-right">
         <div id="todayBadge" class="app-title-sub"></div>
@@ -33,24 +28,15 @@
       </div>
     </header>
 
-    <!-- タブごとの画面 -->
-
-    <!-- ① ホーム（日記カレンダー） -->
+    <!-- 画面群 -->
     <main>
+      <!-- ① 日記カレンダー -->
       <section id="screen-home" class="screen active">
-        <div class="panel">
+        <div class="panel panel-calendar">
           <div class="month-header">
-            <button
-              class="month-nav-btn"
-              id="btnPrevMonth"
-              type="button"
-            >‹</button>
+            <button class="month-nav-btn" id="btnPrevMonth" type="button">‹</button>
             <strong id="labelMonth"></strong>
-            <button
-              class="month-nav-btn"
-              id="btnNextMonth"
-              type="button"
-            >›</button>
+            <button class="month-nav-btn" id="btnNextMonth" type="button">›</button>
           </div>
 
           <div class="weekdays">
@@ -62,12 +48,12 @@
         </div>
       </section>
 
-      <!-- ② 予定（簡易版。必要に応じて拡張してOK） -->
+      <!-- ② 予定（プレースホルダ） -->
       <section id="screen-schedule" class="screen">
         <div class="panel">
-          <h3 style="margin:0 0 6px;font-size:15px">予定一覧</h3>
+          <h3 class="panel-title">予定一覧</h3>
           <div id="scheduleList" class="list small-text">
-            （ここに日記とは別の予定を表示できます）
+            （今後の拡張用スペース）
           </div>
         </div>
       </section>
@@ -75,64 +61,36 @@
       <!-- ③ 検索 -->
       <section id="screen-search" class="screen">
         <div class="panel">
-          <h3 style="margin:0 0 6px;font-size:15px">検索</h3>
-          <input
-            id="searchInput"
-            type="text"
-            placeholder="キーワード（タイトル・本文）"
-            class="editor-input"
-            style="margin-bottom:8px"
-          />
-          <div id="searchResult" class="list small-text"></div>
+          <h3 class="panel-title">検索</h3>
+          <input id="searchInput" type="text" placeholder="キーワード（タイトル・本文）" class="editor-input" />
+          <div id="searchResult" class="list small-text" style="margin-top:8px"></div>
         </div>
       </section>
 
       <!-- ④ スケジュール調整（プレースホルダ） -->
       <section id="screen-coord" class="screen">
         <div class="panel">
-          <h3 style="margin:0 0 6px;font-size:15px">スケジュール調整</h3>
-          <p class="app-title-sub">
-            将来的に、帯カレンダーや共有候補リストをここに配置できます。
-          </p>
+          <h3 class="panel-title">スケジュール調整</h3>
+          <p class="app-title-sub">帯カレンダーや候補時間共有などを将来的に配置する想定。</p>
         </div>
       </section>
 
       <!-- ⑤ 設定（インポート／エクスポート） -->
       <section id="screen-settings" class="screen">
         <div class="panel">
-          <h3 style="margin:0 0 6px;font-size:15px">設定</h3>
+          <h3 class="panel-title">設定</h3>
 
-          <div class="app-title-sub" style="margin-bottom:6px">
-            データのバックアップ & 移行
-          </div>
+          <div class="app-title-sub">データのバックアップ & 移行</div>
+          <button id="btnExportJSON" class="btn-primary" type="button">データをエクスポート（JSONを表示）</button>
+          <textarea id="exportOutput" class="editor-textarea" placeholder="エクスポート結果" style="margin-top:6px;min-height:120px"></textarea>
 
-          <button id="btnExportJSON" class="btn-primary" type="button">
-            データをエクスポート（JSONを表示）
-          </button>
-
-          <textarea
-            id="exportOutput"
-            class="editor-textarea"
-            placeholder="エクスポート結果（読み取り専用）"
-            style="margin-top:6px;min-height:120px"
-          ></textarea>
-
-          <div style="margin-top:10px" class="app-title-sub">
-            JSONファイルからインポート（※既存データに上書き）
-          </div>
-          <input
-            id="importFile"
-            type="file"
-            accept="application/json"
-            style="margin:4px 0 6px"
-          />
-          <button id="btnImportJSON" class="btn-danger" type="button">
-            インポートを実行
-          </button>
+          <div class="app-title-sub" style="margin-top:10px">JSONファイルからインポート（既存データに上書き）</div>
+          <input id="importFile" type="file" accept="application/json" style="margin:4px 0 6px" />
+          <button id="btnImportJSON" class="btn-danger" type="button">インポートを実行</button>
 
           <p class="app-title-sub" style="margin-top:8px">
-            ※ブラウザ／PWAのローカルストレージに保存しており、<br />
-            アップデートしても基本的に消えません。
+            データは端末内（ローカルストレージ）に保存されます。<br />
+            バージョン更新では基本的に消えませんが、念のため定期的にエクスポートを推奨します。
           </p>
         </div>
       </section>
@@ -142,24 +100,19 @@
   <!-- 下タブバー -->
   <nav class="tabbar">
     <button class="tab-btn active" data-target="screen-home" type="button">
-      <span class="icon">月</span>
-      日記
+      <span class="icon">月</span>日記
     </button>
     <button class="tab-btn" data-target="screen-schedule" type="button">
-      <span class="icon">📅</span>
-      予定
+      <span class="icon">📅</span>予定
     </button>
     <button class="tab-btn" data-target="screen-search" type="button">
-      <span class="icon">🔍</span>
-      検索
+      <span class="icon">🔍</span>検索
     </button>
     <button class="tab-btn" data-target="screen-coord" type="button">
-      <span class="icon">⇔</span>
-      調整
+      <span class="icon">⇔</span>調整
     </button>
     <button class="tab-btn" data-target="screen-settings" type="button">
-      <span class="icon">⚙</span>
-      設定
+      <span class="icon">⚙</span>設定
     </button>
   </nav>
 
@@ -173,29 +126,31 @@
       </div>
     </div>
 
-    <input
-      id="editorTitle"
-      class="editor-input"
-      placeholder="タイトル"
-    />
+    <!-- 起床・食事ブロック -->
+    <div class="meal-block">
+      <label>起床
+        <input id="editorWake" type="time" />
+      </label>
+      <label>朝
+        <input id="editorBreakfast" type="text" placeholder="朝食" />
+      </label>
+      <label>昼
+        <input id="editorLunch" type="text" placeholder="昼食" />
+      </label>
+      <label>夜
+        <input id="editorDinner" type="text" placeholder="夕食" />
+      </label>
+    </div>
 
-    <textarea
-      id="editorBody"
-      class="editor-textarea"
-      placeholder="今日のこと、気づき、メモなど"
-    ></textarea>
+    <input id="editorTitle" class="editor-input" placeholder="タイトル" />
+    <textarea id="editorBody" class="editor-textarea" placeholder="今日のこと、気づき、メモなど"></textarea>
 
     <div class="editor-actions">
-      <button id="btnDeleteEntry" class="btn-danger" type="button">
-        削除
-      </button>
-      <button id="btnSaveEntry" class="btn-primary" type="button">
-        保存して戻る
-      </button>
+      <button id="btnDeleteEntry" class="btn-danger" type="button">削除</button>
+      <button id="btnSaveEntry" class="btn-primary" type="button">保存して戻る</button>
     </div>
   </div>
 
-  <!-- JS -->
   <script src="app.js" defer></script>
 </body>
 </html>
