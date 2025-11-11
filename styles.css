@@ -1,4 +1,4 @@
-/* ベース */
+/* リセット & 共通 */
 
 *,
 *::before,
@@ -10,65 +10,61 @@ body {
   margin: 0;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  background: #020813;
-  color: #e7edf8;
+  background: #f3f5fb;
+  color: #222;
 }
 
 .app {
-  max-width: 480px;
+  max-width: 520px;
   margin: 0 auto;
   min-height: 100vh;
-  padding-bottom: 64px; /* タブバー分 */
+  padding-bottom: 80px; /* 下タブの高さ分 */
 }
 
-/* ヘッダー */
+/* ヘッダー（シンプル） */
 
 .app-header {
   padding: 10px 14px 4px;
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  gap: 8px;
+  align-items: center;
 }
 
-.app-title-main {
-  font-size: 20px;
-  font-weight: 600;
+.app-header-left {
+  height: 24px;
 }
 
-.app-title-sub {
+.today-badge {
   font-size: 11px;
-  color: #8c93a5;
-}
-
-.app-header-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
+  color: #6b7280;
 }
 
 .icon-gear {
   border: none;
-  background: transparent;
-  color: #8c93a5;
-  font-size: 17px;
+  background: none;
+  color: #6b7280;
+  font-size: 20px;
+  padding: 4px 6px;
   cursor: pointer;
+}
+
+.icon-gear:active {
+  transform: scale(0.94);
 }
 
 /* パネル */
 
 .panel {
-  margin: 0 8px 8px;
-  padding: 8px;
-  border-radius: 16px;
-  background: radial-gradient(circle at top left, #1a2a40, #060b16);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+  margin: 0 10px 10px;
+  padding: 10px;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
 }
 
 .panel-calendar {
-  /* 画面高に合わせてカレンダー最大化 */
-  min-height: calc(100vh - 130px);
+  /* カレンダー用：高さを目一杯使ってマスを大きく */
+  min-height: calc(100vh - 150px);
   display: flex;
   flex-direction: column;
 }
@@ -88,10 +84,16 @@ body {
   margin-bottom: 4px;
 }
 
+#labelMonth {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
 .month-nav-btn {
   border: none;
-  background: #111826;
-  color: #e7edf8;
+  background: #eef2ff;
+  color: #4b5563;
   border-radius: 999px;
   width: 26px;
   height: 26px;
@@ -102,96 +104,68 @@ body {
   font-size: 16px;
 }
 
+.month-nav-btn:active {
+  transform: scale(0.92);
+}
+
+/* 曜日 */
+
 .weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   font-size: 10px;
-  color: #8c93a5;
+  color: #9ca3af;
   margin-bottom: 2px;
+  text-align: center;
 }
 
-/* カレンダーグリッド */
+/* カレンダーグリッド（マス最大化） */
 
 .calendar-grid {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-auto-rows: 1fr;
-  gap: 1px;
+  gap: 2px;
 }
 
 .day-cell {
-  padding: 2px 2px 1px;
-  border-radius: 6px;
-  background: rgba(3, 9, 20, 0.98);
+  padding: 3px 3px 2px;
+  border-radius: 9px;
+  background: #f9fafb;
+  border: 1px solid transparent;
   display: flex;
   flex-direction: column;
   cursor: pointer;
   overflow: hidden;
 }
 
+.day-cell:hover {
+  border-color: #dbeafe;
+  background: #eff6ff;
+}
+
 .day-number {
   font-size: 10px;
   line-height: 1;
   margin-bottom: 1px;
+  color: #4b5563;
 }
 
 .day-number.other {
-  color: #4b5568;
+  color: #cbd5f5;
 }
 
 .day-number.today {
-  color: #7dd3fc;
-  font-weight: 600;
+  color: #2563eb;
+  font-weight: 700;
 }
 
 .day-events {
   font-size: 8px;
-  line-height: 1.2;
-  color: #cdd4e4;
+  line-height: 1.25;
+  color: #111827;
   word-wrap: break-word;
-}
-
-/* タブバー */
-
-.tabbar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 4px 0;
-  display: flex;
-  justify-content: center;
-  gap: 4px;
-  background: rgba(2, 8, 19, 0.98);
-  backdrop-filter: blur(16px);
-  z-index: 40;
-}
-
-.tab-btn {
-  flex: 1;
-  max-width: 90px;
-  border: none;
-  background: transparent;
-  color: #6b7280;
-  font-size: 9px;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-}
-
-.tab-btn .icon {
-  font-size: 14px;
-}
-
-.tab-btn.active {
-  color: #e5e7ff;
-}
-
-.tab-btn.active .icon {
-  color: #38bdf8;
 }
 
 /* 画面切り替え */
@@ -204,19 +178,83 @@ body {
   display: block;
 }
 
-/* 記帳画面（フルスクリーン） */
+/* 下タブバー（大きめタップ領域） */
+
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 6px 12px 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  background: rgba(243, 245, 251, 0.98);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 -4px 14px rgba(148, 163, 253, 0.25);
+  z-index: 40;
+}
+
+.tab-btn {
+  flex: 1;
+  max-width: 100px;
+  border: none;
+  background: transparent;
+  padding: 4px 4px 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  color: #9ca3af;
+  font-size: 10px;
+}
+
+.tab-btn .icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  background: #e5e7eb;
+}
+
+.tab-btn .label {
+  font-size: 9px;
+}
+
+.tab-btn.active {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.tab-btn.active .icon {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.4);
+}
+
+.tab-btn:active {
+  transform: translateY(1px);
+}
+
+/* 記帳画面（明るめフルスクリーン） */
 
 .editor-screen {
   position: fixed;
   inset: 0;
-  max-width: 480px;
+  max-width: 520px;
   margin: 0 auto;
-  background: #020813;
+  background: #f3f5fb;
   transform: translateY(100%);
-  transition: transform 0.2s ease-out;
+  transition: transform 0.22s ease-out;
   z-index: 50;
-  padding: 8px 10px 76px;
+  padding: 10px 12px 90px;
   box-sizing: border-box;
+  box-shadow: 0 -4px 16px rgba(148, 163, 253, 0.4);
+  border-radius: 18px 18px 0 0;
 }
 
 .editor-screen.show {
@@ -227,23 +265,13 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 6px;
-}
-
-.editor-header-title {
-  font-size: 13px;
-  color: #9ca3af;
-}
-
-.editor-date {
-  font-size: 11px;
-  color: #e5e7ff;
+  margin-bottom: 8px;
 }
 
 #btnEditorBack {
   border: none;
-  background: #111827;
-  color: #e5e7ff;
+  background: #e5e7eb;
+  color: #374151;
   width: 26px;
   height: 26px;
   border-radius: 999px;
@@ -253,69 +281,79 @@ body {
   cursor: pointer;
 }
 
-/* 起床・食事 */
+.editor-header-title {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.editor-date {
+  font-size: 11px;
+  color: #111827;
+}
+
+/* 起床・食事ブロック */
 
 .meal-block {
   display: grid;
-  grid-template-columns: 1.1fr 2fr 2fr 2fr;
+  grid-template-columns: 1.2fr 1.6fr 1.6fr 1.6fr;
   gap: 4px;
   margin-bottom: 6px;
   font-size: 9px;
-  color: #9ca3af;
+  color: #6b7280;
 }
 
 .meal-block label {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
 }
 
 .meal-block input {
-  padding: 3px 4px;
-  border-radius: 8px;
-  border: 1px solid #111827;
-  background: #020817;
-  color: #e5e7ff;
+  padding: 4px 6px;
+  border-radius: 9px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
   font-size: 10px;
+  color: #111827;
 }
 
 /* エディタ入力 */
 
 .editor-input {
   width: 100%;
-  padding: 6px 7px;
+  padding: 6px 8px;
   margin-bottom: 4px;
   border-radius: 10px;
-  border: 1px solid #111827;
-  background: #020817;
-  color: #e5e7ff;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
   font-size: 11px;
+  color: #111827;
 }
 
 .editor-textarea {
   width: 100%;
-  padding: 6px 7px;
+  padding: 6px 8px;
   border-radius: 10px;
-  border: 1px solid #111827;
-  background: #020817;
-  color: #e5e7ff;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
   font-size: 11px;
+  color: #111827;
   resize: vertical;
   min-height: 120px;
 }
 
-/* ボタン */
+/* 記帳ボタン */
 
 .editor-actions {
-  margin-top: 6px;
+  margin-top: 8px;
   display: flex;
   justify-content: space-between;
-  gap: 6px;
+  gap: 8px;
 }
 
 .btn-primary,
 .btn-danger {
-  padding: 6px 10px;
+  padding: 7px 14px;
   border-radius: 999px;
   border: none;
   font-size: 10px;
@@ -323,23 +361,25 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(to right, #38bdf8, #4f46e5);
-  color: #f9fafb;
+  flex: 1;
+  background: linear-gradient(to right, #60a5fa, #2563eb);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
 }
 
 .btn-danger {
-  background: #111827;
-  color: #f97373;
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
-/* リスト・小テキスト */
-
-.list {
-  font-size: 11px;
-  line-height: 1.5;
-}
+/* その他テキスト */
 
 .small-text {
   font-size: 10px;
-  color: #cbd5f5;
+  color: #6b7280;
+}
+
+.list {
+  font-size: 11px;
+  color: #374151;
 }
