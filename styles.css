@@ -384,4 +384,42 @@ body {
   font-size: 11px;
   color: #374151;
 }
+/* ==== カレンダーを「びっしり」敷き詰める上書き ==== */
+
+/* 日付グリッド全体：7列・隙間ゼロ・高さを揃える */
+#calGrid,
+#schedGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  /* 1マスをしっかり大きく取る（必要なら数値を増減して調整） */
+  grid-auto-rows: minmax(52px, 1fr);
+  gap: 0;                 /* ←ここが超重要：隙間ゼロ */
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+}
+
+/* 各日付セル：外側の余白を殺して、枠線だけで区切る */
+#calGrid > div,
+#schedGrid > div {
+  box-sizing: border-box;
+  margin: 0;              /* セル間のスキマ原因を消す */
+  padding: 2px 3px;
+  border: 0.5px solid rgba(0,0,0,0.22); /* 線だけ残す（色はお好みで） */
+  background: #111;       /* 写真のようなダーク背景ならここを変更 */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* 日付数字を左上に小さく表示する例（お好みで） */
+#calGrid > div .day-num,
+#schedGrid > div .day-num {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
 
