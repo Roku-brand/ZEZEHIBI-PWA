@@ -2,8 +2,13 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#111111" />
+  <!-- ズーム抑制＋iPhone対応 -->
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#02040a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
   <title>是々日々</title>
 
   <!-- PWA -->
@@ -15,7 +20,9 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <noscript>このアプリを利用するにはJavaScriptを有効にしてください。</noscript>
+<noscript>このアプリを利用するにはJavaScriptを有効にしてください。</noscript>
+
+<div class="app-root">
 
   <!-- ヘッダー -->
   <header class="top-bar">
@@ -23,18 +30,17 @@
     <div class="top-today" id="todayLabel"></div>
   </header>
 
-  <!-- 画面本体 -->
-  <main>
+  <!-- 本体 -->
+  <main class="main-area">
 
-    <!-- 日記（月カレンダー + 日別） -->
+    <!-- 日記（月カレンダー＋日別） -->
     <section id="screenDiary" class="screen screen-active">
       <div class="month-header">
-        <button id="dPrevM" class="nav-btn">‹</button>
+        <button id="dPrevM" class="nav-btn" aria-label="前の月">‹</button>
         <div id="dMonthLabel" class="month-label"></div>
-        <button id="dNextM" class="nav-btn">›</button>
+        <button id="dNextM" class="nav-btn" aria-label="次の月">›</button>
       </div>
 
-      <!-- 曜日ヘッダー -->
       <div class="weekday-row">
         <div class="wd sun">日</div>
         <div class="wd">月</div>
@@ -45,10 +51,10 @@
         <div class="wd sat">土</div>
       </div>
 
-      <!-- カレンダー（隙間ゼロでびっしり） -->
+      <!-- カレンダー：7×6・隙間ゼロで敷き詰め -->
       <div id="dCalGrid" class="calendar-grid"></div>
 
-      <!-- 選択日の概要 -->
+      <!-- 選択日 -->
       <div class="day-summary">
         <div>
           <span id="dSelDateLabel" class="badge"></span>
@@ -57,7 +63,7 @@
         <button id="dNewBtn" class="primary-btn">記録を書く</button>
       </div>
 
-      <!-- 選択日の一覧 -->
+      <!-- 日記リスト -->
       <div id="dList" class="card-list"></div>
 
       <!-- 日記編集モーダル -->
@@ -77,11 +83,11 @@
             </label>
             <label class="field-label">
               朝食
-              <input id="diaryBreakfast" type="text" placeholder="例）トースト" />
+              <input id="diaryBreakfast" type="text" placeholder="例：トースト" />
             </label>
             <label class="field-label">
-              昼食/夕食
-              <input id="diaryLunchDinner" type="text" placeholder="例）パスタ / カレー" />
+              昼・夕
+              <input id="diaryLunchDinner" type="text" placeholder="例：パスタ / カレー" />
             </label>
           </div>
 
@@ -110,9 +116,9 @@
     <!-- 予定 -->
     <section id="screenSched" class="screen">
       <div class="month-header">
-        <button id="sPrevM" class="nav-btn">‹</button>
+        <button id="sPrevM" class="nav-btn" aria-label="前の月">‹</button>
         <div id="sMonthLabel" class="month-label"></div>
-        <button id="sNextM" class="nav-btn">›</button>
+        <button id="sNextM" class="nav-btn" aria-label="次の月">›</button>
       </div>
 
       <div class="weekday-row">
@@ -187,10 +193,14 @@
 
     <!-- 検索 -->
     <section id="screenSearch" class="screen">
-      <div class="search-panel">
-        <input id="searchInput" type="text" placeholder="キーワード（タイトル・本文・予定など）" />
+      <div class="section-header">
+        <h2>検索</h2>
       </div>
-
+      <div class="search-panel">
+        <input id="searchInput" type="text"
+               class="search-input"
+               placeholder="キーワードで日記・予定を検索" />
+      </div>
       <div class="search-grid">
         <div>
           <h3 class="sub-heading">日記</h3>
@@ -203,36 +213,28 @@
       </div>
     </section>
 
-    <!-- スケジュール調整（簡略版） -->
+    <!-- スケジュール調整（簡略・帯） -->
     <section id="screenCoord" class="screen">
       <div class="coord-header">
         <div id="coordWeekLabel" class="month-label small"></div>
         <button id="coordPrev" class="nav-btn">‹</button>
         <button id="coordNext" class="nav-btn">›</button>
       </div>
-      <div id="coordBands" class="bands-list">
-        <!-- JSで帯を描画 -->
-      </div>
+      <div id="coordBands" class="bands-list"></div>
     </section>
 
   </main>
 
-  <!-- 下タブ -->
+  <!-- タブバー：下だけどホームバーより少し上に浮かす -->
   <nav class="tab-bar">
-    <button class="tab-btn tab-active" data-target="screenDiary">
-      <span>日記</span>
-    </button>
-    <button class="tab-btn" data-target="screenSched">
-      <span>予定</span>
-    </button>
-    <button class="tab-btn" data-target="screenSearch">
-      <span>検索</span>
-    </button>
-    <button class="tab-btn" data-target="screenCoord">
-      <span>調整</span>
-    </button>
+    <button class="tab-btn tab-active" data-target="screenDiary">日記</button>
+    <button class="tab-btn" data-target="screenSched">予定</button>
+    <button class="tab-btn" data-target="screenSearch">検索</button>
+    <button class="tab-btn" data-target="screenCoord">調整</button>
   </nav>
 
-  <script src="app.js"></script>
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
