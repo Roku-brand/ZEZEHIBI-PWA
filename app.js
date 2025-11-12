@@ -1,510 +1,456 @@
-// ===== 設定 =====
-const STORAGE_PREFIX = "zezehibi_v1_"; // 将来アップデートしてもキーを変えれば既存は保持
+/* =========================
+   ZEZEHIBI app.js (full)
+   ========================= */
 
-// ===== ユーティリティ =====
-const $ = (id) => document.getElementById(id);
+/* ---------- Const / Util ---------- */
+const STORAGE_KEY = "zezehibi.v1";
+const WJP = ["日","月","火","水","木","金","土"];
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+const toISO = (d)=> new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+const pad = (n)=> String(n).padStart(2,"0");
+const esc = (s)=> (s||"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+const fmtJP = (iso)=>{ const [y,m,d]=iso.split("-").map(Number); const dt=new Date(y,m-1,d); return `${m}月${d}日(${WJP[dt.getDay()]})`; };
 
-const fmtDate = (d) => d.toISOString().slice(0, 10);
-const jpDate = (d) =>
-  `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日（${
-    "日月火水木金土"[d.getDay()]
-  }）`;
+/* ---------- DB (localStorage) ---------- */
+function loadDB(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const base = raw ? JSON.parse(raw) : { entries:[], schedules:[], work:{} };
+    if(!Array.isArray(base.entries)) base.entries=[];
+    if(!Array.isArray(base.schedules)) base.schedules=[];
+    if(typeof base.work!=="object"||!base.work) base.work={};
+    return base;
+  }catch{ return { entries:[], schedules:[], work:{} }; }
+}
+let db = loadDB();
+const persist = ()=> localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
 
-const parseDate = (s) => {
-  const [y, m, d] = s.split("-").map(Number);
-  return new Date(y, m - 1, d);
+/* ---------- Global State ---------- */
+let state = {
+  viewMonth: (()=>{ const d=new Date(); d.setDate(1); return d; })(),
+  selDate: toISO(new Date()),
+  // ダブルタップ検出
+  _lastTapTime: 0,
+  _lastTapTarget: null,
 };
 
-const today = new Date();
-
-// ===== 状態 =====
-let diaryMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-let schedMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-let selectedDiaryDate = fmtDate(today);
-let selectedSchedDate = fmtDate(today);
-
-// ===== ストレージ =====
-const loadJSON = (key, def) => {
-  try {
-    const v = localStorage.getItem(STORAGE_PREFIX + key);
-    return v ? JSON.parse(v) : def;
-  } catch {
-    return def;
-  }
+/* ---------- Elements ---------- */
+// Top
+const todayBadge = $("#todayBadge");
+// Tabs
+const tabDiary=$("#tabDiary"), tabSched=$("#tabSched"), tabSearch=$("#tabSearch"), tabCoord=$("#tabCoord");
+const screens = {
+  diary: $("#screenDiary"),
+  sched: $("#screenSched"),
+  search: $("#screenSearch"),
+  coord: $("#screenCoord"),
+  editor: $("#screenEditor"),
 };
+// Diary screen
+const monthLabel = $("#monthLabel");
+const calGrid = $("#calGrid");
+const prevM = $("#prevM"), nextM = $("#nextM");
+const daySummary = $("#daySummary");
+const selISO = $("#selISO"), selJP=$("#selJP");
+const dayCards = $("#dayCards");
+const openEditorBtn = $("#openEditorBtn");
 
-const saveJSON = (key, value) => {
-  localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
-};
+// Schedule mini (簡易)
+const sPrevM=$("#sPrevM"), sNextM=$("#sNextM");
+const schedMonthLabel=$("#schedMonthLabel");
+const schedGrid=$("#schedGrid");
+const schedList=$("#schedList");
+const schedKPI=$("#schedKPI");
 
-let diaryData = loadJSON("diary", {});
-let schedData = loadJSON("sched", {});
+// Search
+const q = $("#q");
+const searchDiary = $("#searchDiary");
+const searchSched = $("#searchSched");
 
-// ===== タブ切替 =====
-document.querySelectorAll(".tab-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const target = btn.dataset.target;
-    document
-      .querySelectorAll(".screen")
-      .forEach((s) => s.classList.remove("screen-active"));
-    document.getElementById(target).classList.add("screen-active");
+// Editor screen
+const backToCalendar = $("#backToCalendar");
+const editISO=$("#editISO"), editJP=$("#editJP");
+const dateInput=$("#dateInput"), wakeEl=$("#wake");
+const breakfastEl=$("#breakfast"), lunchEl=$("#lunch"), dinnerEl=$("#dinner");
+const titleEl=$("#title"), bodyEl=$("#body");
+const deleteEntry=$("#deleteEntry"), saveEntryBtn=$("#saveEntry"), saveState=$("#saveState");
 
-    document
-      .querySelectorAll(".tab-btn")
-      .forEach((b) => b.classList.remove("tab-active"));
-    btn.classList.add("tab-active");
+/* ---------- Helpers ---------- */
+const entriesOn = (iso)=> db.entries.filter(e=>e.date===iso).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+const schedOn = (iso)=> db.schedules.filter(s=>s.date===iso).sort((a,b)=> ((a.start||"") < (b.start||""))? -1: 1);
+const ensureEntry = (iso)=>{ let e=db.entries.find(x=>x.date===iso); if(!e){ e={
+  id: "id_"+Math.random().toString(36).slice(2,8)+Date.now().toString(36),
+  date: iso, wake:"", breakfast:"", lunch:"", dinner:"",
+  title:"", body:"", createdAt: Date.now(), updatedAt: Date.now()
+}; db.entries.push(e); persist(); } return e; };
+
+/* ---------- Screen switch ---------- */
+function setActiveTab(id){
+  [tabDiary,tabSched,tabSearch,tabCoord].forEach(b=>{
+    const active = b.id===id;
+    b.classList.toggle("tab-active", active);
+    b.setAttribute("aria-selected", active ? "true":"false");
   });
-});
-
-// 今日ラベル
-$("todayLabel").textContent = jpDate(today);
-
-// ===== カレンダー描画共通 =====
-function buildMonthDays(baseDate) {
-  const year = baseDate.getFullYear();
-  const month = baseDate.getMonth();
-  const first = new Date(year, month, 1);
-  const startDay = first.getDay();
-  const start = new Date(year, month, 1 - startDay); // 日曜始まり
-  const days = [];
-  for (let i = 0; i < 42; i++) {
-    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
-    days.push(d);
-  }
-  return days;
+}
+function showScreen(name){
+  Object.values(screens).forEach(el=> el.classList.remove("active","screen-active"));
+  screens[name].classList.add("active","screen-active");
+  setActiveTab({screenDiary:"tabDiary",screenSched:"tabSched",screenSearch:"tabSearch",screenCoord:"tabCoord",screenEditor:null}[screens[name].id] || "");
+  // 末尾余白が被らないようにスクロール位置調整は不要（余白をHTML側で確保済）
 }
 
-function fillCalendarGrid(gridEl, monthDate, hasFn) {
-  gridEl.innerHTML = "";
-  const days = buildMonthDays(monthDate);
-  const curYear = monthDate.getFullYear();
-  const curMonth = monthDate.getMonth();
-
-  days.forEach((d) => {
-    const iso = fmtDate(d);
+/* ---------- Calendar render (7x6) ---------- */
+function startOfCalendar(monthDate){
+  // 月初の曜日。日曜始まりで、前月末を埋める開始日を返す
+  const y = monthDate.getFullYear(), m = monthDate.getMonth();
+  const first = new Date(y,m,1);
+  const dow = first.getDay(); // 0..6 (Sun..Sat)
+  const start = new Date(y,m,1 - dow);
+  start.setHours(0,0,0,0);
+  return start;
+}
+function renderCalendar(){
+  const y = state.viewMonth.getFullYear(), m = state.viewMonth.getMonth();
+  monthLabel.textContent = `${y}年 ${m+1}月`;
+  // 42 cells
+  calGrid.innerHTML = "";
+  const start = startOfCalendar(state.viewMonth);
+  for(let i=0; i<42; i++){
+    const d = new Date(start); d.setDate(start.getDate()+i);
+    const iso = toISO(d);
+    const inMonth = d.getMonth()===m;
+    const wd = d.getDay();
     const cell = document.createElement("div");
-    cell.className = "day-cell";
+    cell.className = "day-cell" + (inMonth?"":" out");
+    if(wd===0) cell.classList.add("sun");
+    if(wd===6) cell.classList.add("sat");
+    if(iso===toISO(new Date())) cell.classList.add("today");
+    if(iso===state.selDate) cell.classList.add("selected");
 
-    if (d.getMonth() !== curMonth) cell.classList.add("other-month");
-    if (iso === fmtDate(today)) cell.classList.add("today");
-
+    // number
     const num = document.createElement("div");
-    num.className = "day-num";
+    num.className="day-num";
     num.textContent = d.getDate();
     cell.appendChild(num);
 
-    const tagsText = hasFn(iso);
-    if (tagsText) {
-      cell.classList.add("has-entry");
-      const tags = document.createElement("div");
-      tags.className = "day-tags";
-      tags.textContent = tagsText;
-      cell.appendChild(tags);
+    // tags (titles of this day)
+    const tags = document.createElement("div");
+    tags.className="day-tags";
+    const titles = entriesOn(iso)
+      .map(e=> (e.title || e.body || "").trim())
+      .filter(Boolean);
+    tags.innerHTML = esc(titles.join("\n"));
+    cell.appendChild(tags);
+
+    // selection & double tap to open editor
+    cell.dataset.iso = iso;
+    cell.addEventListener("click", ()=> selectDate(iso, cell));
+    cell.addEventListener("dblclick", ()=> openEditorFor(iso));
+
+    // double-tap (mobile)
+    cell.addEventListener("touchend", (ev)=>{
+      const now = Date.now();
+      if(state._lastTapTarget===cell && (now - state._lastTapTime) < 350){
+        state._lastTapTime = 0; state._lastTapTarget = null;
+        ev.preventDefault();
+        openEditorFor(iso);
+      }else{
+        state._lastTapTarget = cell; state._lastTapTime = now;
+        // クリック扱いで日付選択
+        selectDate(iso, cell);
+      }
+    }, {passive:false});
+
+    calGrid.appendChild(cell);
+  }
+  renderDaySummary();
+  renderDayCards();
+}
+
+/* ---------- Select Date ---------- */
+function selectDate(iso, cell){
+  state.selDate = iso;
+  $$(".day-cell.selected", calGrid).forEach(n=> n.classList.remove("selected"));
+  if(cell) cell.classList.add("selected");
+  selISO.textContent = iso;
+  selJP.textContent = fmtJP(iso);
+  renderDayCards();
+}
+
+/* ---------- Day Summary & Cards ---------- */
+function renderDaySummary(){
+  selISO.textContent = state.selDate;
+  selJP.textContent = fmtJP(state.selDate);
+}
+function renderDayCards(){
+  const list = entriesOn(state.selDate);
+  dayCards.innerHTML = "";
+  if(!list.length){
+    const empty = document.createElement("div");
+    empty.className="card";
+    empty.innerHTML = `<div class="card-title">この日の記録はまだありません</div>
+      <div class="card-sub">ダブルタップ/ダブルクリックで作成できます</div>`;
+    dayCards.appendChild(empty);
+    return;
+  }
+  list.forEach(e=>{
+    const card = document.createElement("div");
+    card.className="card";
+    const meals = [
+      e.wake && `☀️ ${e.wake}`,
+      e.breakfast && `🍳 ${esc(e.breakfast)}`,
+      e.lunch && `🍱 ${esc(e.lunch)}`,
+      e.dinner && `🍽️ ${esc(e.dinner)}`
+    ].filter(Boolean).join(" / ");
+    card.innerHTML = `
+      <div class="card-title">${esc(e.title || "(無題)")}</div>
+      <div class="card-sub">${e.date}${meals ? "　" + meals : ""}</div>
+    `;
+    card.addEventListener("click", ()=> openEditorWithEntry(e.id));
+    dayCards.appendChild(card);
+  });
+}
+
+/* ---------- Editor ---------- */
+let currentEntryId = null;
+
+function fillEditorByEntry(e){
+  editISO.textContent = e.date;
+  editJP.textContent = fmtJP(e.date);
+  dateInput.value = e.date;
+  wakeEl.value = e.wake || "";
+  breakfastEl.value = e.breakfast || "";
+  lunchEl.value = e.lunch || "";
+  dinnerEl.value = e.dinner || "";
+  titleEl.value = e.title || "";
+  bodyEl.value = e.body || "";
+  saveState.textContent = "—";
+}
+function openEditorWithEntry(id){
+  const e = db.entries.find(x=>x.id===id);
+  if(!e) return;
+  currentEntryId = id;
+  fillEditorByEntry(e);
+  showScreen("editor");
+}
+function openEditorFor(iso){
+  // 新規 or 既存の先頭を開く（既存優先）
+  const exist = entriesOn(iso)[0];
+  const e = exist || ensureEntry(iso);
+  currentEntryId = e.id;
+  fillEditorByEntry(e);
+  showScreen("editor");
+}
+
+function currentEntry(){ return db.entries.find(e=> e.id===currentEntryId) || null; }
+function updateCurrentFromForm(){
+  const cur = currentEntry(); if(!cur) return;
+  cur.date = dateInput.value || cur.date;
+  cur.wake = wakeEl.value;
+  cur.breakfast = breakfastEl.value;
+  cur.lunch = lunchEl.value;
+  cur.dinner = dinnerEl.value;
+  cur.title = titleEl.value;
+  cur.body = bodyEl.value;
+  cur.updatedAt = Date.now();
+}
+function saveCurrent(){
+  const cur = currentEntry(); if(!cur) return;
+  updateCurrentFromForm();
+  persist();
+  state.selDate = cur.date;
+  saveState.textContent = "保存済み";
+  setTimeout(()=> saveState.textContent="—", 1200);
+  // カレンダーへ反映
+  renderCalendar();
+}
+function deleteCurrent(){
+  const cur = currentEntry(); if(!cur) return;
+  if(!confirm("この日記を削除しますか？")) return;
+  db.entries = db.entries.filter(e=>e.id!==cur.id);
+  persist();
+  // カレンダー再描画
+  renderCalendar();
+  showScreen("diary");
+}
+
+/* ---------- Schedule (mini) ---------- */
+function renderScheduleMonth(){
+  const y = state.viewMonth.getFullYear(), m = state.viewMonth.getMonth();
+  schedMonthLabel.textContent = `${y}年 ${m+1}月`;
+  // KPI
+  const startISO = toISO(new Date(y,m,1));
+  const endISO = toISO(new Date(y,m+1,0));
+  const cnt = db.schedules.filter(s=> s.date>=startISO && s.date<=endISO).length;
+  schedKPI.textContent = `今月の予定: ${cnt}`;
+
+  // mini grid (色帯は省略、件数表示のみ)
+  schedGrid.innerHTML = "";
+  const start = startOfCalendar(state.viewMonth);
+  for(let i=0;i<42;i++){
+    const d = new Date(start); d.setDate(start.getDate()+i);
+    const iso = toISO(d);
+    const cell = document.createElement("div");
+    cell.className = "day-cell" + (d.getMonth()===m ? "" : " out");
+    const num = document.createElement("div");
+    num.className="day-num";
+    num.textContent = d.getDate();
+    cell.appendChild(num);
+
+    const tags = document.createElement("div");
+    tags.className="day-tags";
+    const items = schedOn(iso);
+    if(items.length){
+      tags.textContent = items.slice(0,3).map(s => (s.start? s.start+" ":"") + (s.title||"(無題)")).join("\n");
     }
+    cell.appendChild(tags);
 
-    cell.addEventListener("click", () => {
-      if (gridEl.id === "dCalGrid") {
-        selectedDiaryDate = iso;
-        renderDiaryList();
-      } else if (gridEl.id === "sCalGrid") {
-        selectedSchedDate = iso;
-        renderSchedList();
-      }
+    cell.addEventListener("click", ()=> {
+      state.selDate = iso;
+      renderScheduleList();
     });
 
-    gridEl.appendChild(cell);
-  });
+    schedGrid.appendChild(cell);
+  }
+  renderScheduleList();
 }
-
-// ===== 日記 =====
-function renderDiaryMonth() {
-  $("dMonthLabel").textContent =
-    diaryMonth.getFullYear() + "年" + (diaryMonth.getMonth() + 1) + "月";
-  fillCalendarGrid($("dCalGrid"), diaryMonth, (iso) => {
-    const items = diaryData[iso];
-    if (!items || !items.length) return "";
-    // その日のタイトルをつなげて表示
-    return items
-      .map((i) => i.title || i.body?.slice(0, 6) || "")
-      .filter(Boolean)
-      .join(" / ");
-  });
-}
-
-function renderDiaryList() {
-  $("dSelDateLabel").textContent = selectedDiaryDate;
-  $("dSelJP").textContent = jpDate(parseDate(selectedDiaryDate));
-  const box = $("dList");
-  box.innerHTML = "";
-
-  const items = diaryData[selectedDiaryDate] || [];
-  if (!items.length) {
+function renderScheduleList(){
+  const items = schedOn(state.selDate);
+  schedList.innerHTML = "";
+  if(!items.length){
     const empty = document.createElement("div");
-    empty.className = "card";
-    empty.textContent = "この日の記録はまだありません。";
-    box.appendChild(empty);
+    empty.className="card";
+    empty.innerHTML = `<div class="card-title">${fmtJP(state.selDate)} の予定なし</div>`;
+    schedList.appendChild(empty);
     return;
   }
-
-  items.forEach((item) => {
+  items.forEach(s=>{
     const card = document.createElement("div");
-    card.className = "card";
-    const title = document.createElement("div");
-    title.className = "card-title";
-    title.textContent = item.title || "(無題)";
-    const sub = document.createElement("div");
-    sub.className = "card-sub";
-    sub.textContent = [
-      item.wake ? `起床 ${item.wake}` : "",
-      item.breakfast ? `朝: ${item.breakfast}` : "",
-      item.lunchDinner ? `昼/夕: ${item.lunchDinner}` : "",
-    ]
-      .filter(Boolean)
-      .join(" / ");
-    const body = document.createElement("div");
-    body.textContent = item.body || "";
-
-    card.appendChild(title);
-    if (sub.textContent !== "") card.appendChild(sub);
-    card.appendChild(body);
-
-    card.addEventListener("click", () => openDiaryModal(item.id));
-
-    box.appendChild(card);
+    card.className="card";
+    const time = [s.start||"", s.end? `– ${s.end}`:""].filter(Boolean).join(" ");
+    card.innerHTML = `
+      <div class="card-title">${esc(s.title||"(無題)")}</div>
+      <div class="sched-time">${fmtJP(s.date)}／${s.date}　${time}</div>
+      ${s.note? `<div class="card-sub">${esc(s.note)}</div>` : ""}
+    `;
+    schedList.appendChild(card);
   });
 }
 
-function openDiaryModal(id) {
-  const dlg = $("dlgDiary");
-  const isNew = !id;
-  const iso = isNew ? selectedDiaryDate : findDiaryById(id)?.date;
-
-  $("diaryDate").value = iso || selectedDiaryDate;
-  $("diaryWake").value = isNew ? "" : findDiaryById(id).wake || "";
-  $("diaryBreakfast").value = isNew ? "" : findDiaryById(id).breakfast || "";
-  $("diaryLunchDinner").value = isNew ? "" : findDiaryById(id).lunchDinner || "";
-  $("diaryTitle").value = isNew ? "" : findDiaryById(id).title || "";
-  $("diaryBody").value = isNew ? "" : findDiaryById(id).body || "";
-  $("diaryId").value = id || "";
-
-  $("diaryDelete").style.display = isNew ? "none" : "inline-flex";
-  $("dlgDiaryTitle").textContent = isNew ? "日記を追加" : "日記を編集";
-
-  dlg.showModal();
-}
-
-function findDiaryById(id) {
-  for (const date in diaryData) {
-    const hit = (diaryData[date] || []).find((d) => d.id === id);
-    if (hit) return hit;
-  }
-  return null;
-}
-
-// 新規ボタン
-$("dNewBtn").addEventListener("click", () => openDiaryModal(""));
-
-// 保存
-$("diarySave").addEventListener("click", (e) => {
-  e.preventDefault();
-  const id = $("diaryId").value || "d_" + Date.now();
-  const date = $("diaryDate").value || selectedDiaryDate;
-  const obj = {
-    id,
-    date,
-    wake: $("diaryWake").value,
-    breakfast: $("diaryBreakfast").value,
-    lunchDinner: $("diaryLunchDinner").value,
-    title: $("diaryTitle").value,
-    body: $("diaryBody").value,
-  };
-
-  if (!diaryData[date]) diaryData[date] = [];
-  const list = diaryData[date];
-  const idx = list.findIndex((i) => i.id === id);
-  if (idx >= 0) list[idx] = obj;
-  else list.push(obj);
-
-  saveJSON("diary", diaryData);
-  $("dlgDiary").close();
-
-  selectedDiaryDate = date;
-  renderDiaryMonth();
-  renderDiaryList();
-});
-
-// 削除
-$("diaryDelete").addEventListener("click", (e) => {
-  e.preventDefault();
-  const id = $("diaryId").value;
-  if (!id) return;
-  for (const date in diaryData) {
-    diaryData[date] = diaryData[date].filter((i) => i.id !== id);
-    if (!diaryData[date].length) delete diaryData[date];
-  }
-  saveJSON("diary", diaryData);
-  $("dlgDiary").close();
-  renderDiaryMonth();
-  renderDiaryList();
-});
-
-// 月移動
-$("dPrevM").addEventListener("click", () => {
-  diaryMonth = new Date(diaryMonth.getFullYear(), diaryMonth.getMonth() - 1, 1);
-  renderDiaryMonth();
-});
-$("dNextM").addEventListener("click", () => {
-  diaryMonth = new Date(diaryMonth.getFullYear(), diaryMonth.getMonth() + 1, 1);
-  renderDiaryMonth();
-});
-
-// ===== 予定 =====
-function renderSchedMonth() {
-  $("sMonthLabel").textContent =
-    schedMonth.getFullYear() + "年" + (schedMonth.getMonth() + 1) + "月";
-  fillCalendarGrid($("sCalGrid"), schedMonth, (iso) => {
-    const items = schedData[iso];
-    if (!items || !items.length) return "";
-    return items
-      .map((i) => i.title || "")
-      .filter(Boolean)
-      .join(" / ");
-  });
-}
-
-function renderSchedList() {
-  $("sSelDateLabel").textContent = selectedSchedDate;
-  $("sSelJP").textContent = jpDate(parseDate(selectedSchedDate));
-
-  const box = $("sList");
-  box.innerHTML = "";
-  const items = schedData[selectedSchedDate] || [];
-  if (!items.length) {
-    const empty = document.createElement("div");
-    empty.className = "card";
-    empty.textContent = "この日の予定はありません。";
-    box.appendChild(empty);
+/* ---------- Search ---------- */
+function doSearch(){
+  const key = (q.value||"").toLowerCase().trim();
+  searchDiary.innerHTML = "";
+  searchSched.innerHTML = "";
+  if(!key){
+    searchDiary.innerHTML = `<div class="card"><div class="card-title">キーワードを入力</div></div>`;
+    searchSched.innerHTML = searchDiary.innerHTML;
     return;
   }
+  // diary
+  const dres = db.entries
+    .filter(e=> ((e.title||"")+" "+(e.body||"")+" "+(e.breakfast||"")+" "+(e.lunch||"")+" "+(e.dinner||"")).toLowerCase().includes(key))
+    .sort((a,b)=> (b.updatedAt||0)-(a.updatedAt||0))
+    .slice(0,120);
+  if(!dres.length){
+    searchDiary.innerHTML = `<div class="card"><div class="card-title">該当なし</div></div>`;
+  }else{
+    dres.forEach(e=>{
+      const card = document.createElement("div");
+      card.className="card";
+      card.innerHTML = `
+        <div class="card-title">${esc(e.title||"(無題)")}</div>
+        <div class="card-sub">${fmtJP(e.date)}／${e.date}</div>
+      `;
+      card.addEventListener("click", ()=>{
+        // その日のエディタを開く
+        openEditorWithEntry(e.id);
+      });
+      searchDiary.appendChild(card);
+    });
+  }
+  // sched
+  const sres = db.schedules
+    .filter(s=> ((s.title||"")+" "+(s.note||"")+" "+(s.party||"")).toLowerCase().includes(key))
+    .sort((a,b)=> (a.date+a.start < b.date+b.start ? -1:1))
+    .slice(0,120);
+  if(!sres.length){
+    searchSched.innerHTML = `<div class="card"><div class="card-title">該当なし</div></div>`;
+  }else{
+    sres.forEach(s=>{
+      const card = document.createElement("div");
+      card.className="card";
+      const time = [s.start||"", s.end?`– ${s.end}`:""].filter(Boolean).join(" ");
+      card.innerHTML = `
+        <div class="card-title">${esc(s.title||"(無題)")}</div>
+        <div class="card-sub">${fmtJP(s.date)}／${s.date}　${time}</div>
+      `;
+      card.addEventListener("click", ()=>{
+        // 予定タブへ移動して当日の予定を表示
+        showScreen("sched");
+        setActiveTab("tabSched");
+        renderScheduleMonth();
+        state.selDate = s.date;
+        renderScheduleList();
+      });
+      searchSched.appendChild(card);
+    });
+  }
+}
 
-  items.forEach((item) => {
-    const card = document.createElement("div");
-    card.className = "card";
-    const title = document.createElement("div");
-    title.className = "card-title";
-    title.textContent = item.title || "(無題)";
-    const sub = document.createElement("div");
-    sub.className = "card-sub";
-    sub.textContent = `${item.start || ""}〜${item.end || ""} ${item.done ? "（完了）" : ""}`;
-    const note = document.createElement("div");
-    note.textContent = item.note || "";
+/* ---------- Tabs Wiring ---------- */
+tabDiary.addEventListener("click", ()=>{ showScreen("diary"); });
+tabSched.addEventListener("click", ()=>{ showScreen("sched"); renderScheduleMonth(); });
+tabSearch.addEventListener("click", ()=>{ showScreen("search"); });
+tabCoord.addEventListener("click", ()=>{ showScreen("coord"); /* 簡易のため詳細描画は省略 */ });
 
-    card.appendChild(title);
-    card.appendChild(sub);
-    card.appendChild(note);
+/* ---------- Diary month nav ---------- */
+prevM.addEventListener("click", ()=>{ state.viewMonth.setMonth(state.viewMonth.getMonth()-1); renderCalendar(); renderScheduleMonth(); });
+nextM.addEventListener("click", ()=>{ state.viewMonth.setMonth(state.viewMonth.getMonth()+1); renderCalendar(); renderScheduleMonth(); });
 
-    card.addEventListener("click", () => openSchedModal(item.id));
+/* ---------- Sched month nav ---------- */
+sPrevM.addEventListener("click", ()=>{ state.viewMonth.setMonth(state.viewMonth.getMonth()-1); renderScheduleMonth(); });
+sNextM.addEventListener("click", ()=>{ state.viewMonth.setMonth(state.viewMonth.getMonth()+1); renderScheduleMonth(); });
 
-    box.appendChild(card);
+/* ---------- Editor wiring ---------- */
+backToCalendar.addEventListener("click", ()=>{ showScreen("diary"); });
+openEditorBtn.addEventListener("click", ()=> openEditorFor(state.selDate));
+
+saveEntryBtn.addEventListener("click", saveCurrent);
+deleteEntry.addEventListener("click", deleteCurrent);
+// 入力中の自動保存（軽めのデバウンス）
+[dateInput,wakeEl,breakfastEl,lunchEl,dinnerEl,titleEl,bodyEl].forEach(el=>{
+  let t=null;
+  el.addEventListener("input", ()=>{
+    saveState.textContent = "保存中…";
+    if(t) clearTimeout(t);
+    t = setTimeout(()=>{ saveCurrent(); }, 400);
+  });
+});
+
+/* ---------- Search wiring ---------- */
+q.addEventListener("input", doSearch);
+
+/* ---------- PWA: SW registration ---------- */
+if("serviceWorker" in navigator){
+  window.addEventListener("load", ()=>{
+    navigator.serviceWorker.register("./sw.js").catch(console.error);
   });
 }
 
-function findSchedById(id) {
-  for (const date in schedData) {
-    const hit = (schedData[date] || []).find((s) => s.id === id);
-    if (hit) return hit;
-  }
-  return null;
-}
+/* ---------- Init ---------- */
+(function init(){
+  const now = new Date();
+  todayBadge.textContent = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日（${WJP[now.getDay()]}）`;
+  // 初回データ雛形（空でもOK。自動生成はエディタを開いた時にensureEntryで行う）
+  if(!db.entries) db.entries=[];
+  if(!db.schedules) db.schedules=[];
+  persist();
 
-function openSchedModal(id) {
-  const dlg = $("dlgSched");
-  const isNew = !id;
-  const base = isNew ? null : findSchedById(id);
-
-  $("schDate").value = base?.date || selectedSchedDate;
-  $("schStart").value = base?.start || "";
-  $("schEnd").value = base?.end || "";
-  $("schTitle").value = base?.title || "";
-  $("schNote").value = base?.note || "";
-  $("schDone").checked = !!base?.done;
-  $("schId").value = base?.id || "";
-
-  $("schDelete").style.display = isNew ? "none" : "inline-flex";
-
-  dlg.showModal();
-}
-
-$("sNewBtn").addEventListener("click", () => openSchedModal(""));
-
-// 保存
-$("schSave").addEventListener("click", (e) => {
-  e.preventDefault();
-  const id = $("schId").value || "s_" + Date.now();
-  const date = $("schDate").value || selectedSchedDate;
-  const obj = {
-    id,
-    date,
-    start: $("schStart").value,
-    end: $("schEnd").value,
-    title: $("schTitle").value,
-    note: $("schNote").value,
-    done: $("schDone").checked,
-  };
-
-  if (!schedData[date]) schedData[date] = [];
-  const list = schedData[date];
-  const idx = list.findIndex((i) => i.id === id);
-  if (idx >= 0) list[idx] = obj;
-  else list.push(obj);
-
-  saveJSON("sched", schedData);
-  $("dlgSched").close();
-
-  selectedSchedDate = date;
-  renderSchedMonth();
-  renderSchedList();
-});
-
-// 削除
-$("schDelete").addEventListener("click", (e) => {
-  e.preventDefault();
-  const id = $("schId").value;
-  if (!id) return;
-  for (const date in schedData) {
-    schedData[date] = schedData[date].filter((i) => i.id !== id);
-    if (!schedData[date].length) delete schedData[date];
-  }
-  saveJSON("sched", schedData);
-  $("dlgSched").close();
-  renderSchedMonth();
-  renderSchedList();
-});
-
-// 月移動
-$("sPrevM").addEventListener("click", () => {
-  schedMonth = new Date(schedMonth.getFullYear(), schedMonth.getMonth() - 1, 1);
-  renderSchedMonth();
-});
-$("sNextM").addEventListener("click", () => {
-  schedMonth = new Date(schedMonth.getFullYear(), schedMonth.getMonth() + 1, 1);
-  renderSchedMonth();
-});
-
-// ===== 検索 =====
-$("searchInput").addEventListener("input", () => {
-  const q = $("searchInput").value.trim();
-  renderSearch(q);
-});
-
-function renderSearch(q) {
-  const boxD = $("searchDiary");
-  const boxS = $("searchSched");
-  boxD.innerHTML = "";
-  boxS.innerHTML = "";
-  if (!q) return;
-
-  const qLower = q.toLowerCase();
-
-  // 日記
-  for (const date in diaryData) {
-    (diaryData[date] || []).forEach((d) => {
-      const text =
-        `${d.title || ""} ${d.body || ""} ${d.breakfast || ""} ${d.lunchDinner || ""}`.toLowerCase();
-      if (text.includes(qLower)) {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `<div class="card-title">${d.title || "(無題)"}</div>
-          <div class="card-sub">${date}</div>
-          <div>${(d.body || "").slice(0, 80)}</div>`;
-        card.addEventListener("click", () => {
-          selectedDiaryDate = date;
-          renderDiaryMonth();
-          renderDiaryList();
-          document
-            .querySelector('[data-target="screenDiary"]')
-            .click();
-        });
-        boxD.appendChild(card);
-      }
-    });
-  }
-
-  // 予定
-  for (const date in schedData) {
-    (schedData[date] || []).forEach((s) => {
-      const text =
-        `${s.title || ""} ${s.note || ""}`.toLowerCase();
-      if (text.includes(qLower)) {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `<div class="card-title">${s.title || "(無題)"}</div>
-          <div class="card-sub">${date} ${s.start || ""}〜${s.end || ""}</div>
-          <div>${(s.note || "").slice(0, 80)}</div>`;
-        card.addEventListener("click", () => {
-          selectedSchedDate = date;
-          renderSchedMonth();
-          renderSchedList();
-          document
-            .querySelector('[data-target="screenSched"]')
-            .click();
-        });
-        boxS.appendChild(card);
-      }
-    });
-  }
-}
-
-// ===== スケジュール調整（簡略） =====
-function renderCoord() {
-  const box = $("coordBands");
-  box.innerHTML = "";
-
-  // 今週〜2週間分ざっくり
-  const base = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  $("coordWeekLabel").textContent =
-    `${base.getFullYear()}年${base.getMonth() + 1}月 第${Math.floor(
-      (base.getDate() - 1) / 7
-    ) + 1}週`;
-
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i);
-    const iso = fmtDate(d);
-    const plans = (schedData[iso] || []).map((p) => p.title).join(" / ");
-
-    const row = document.createElement("div");
-    row.className = "band-row";
-    const left = document.createElement("div");
-    left.textContent = `${d.getMonth() + 1}/${d.getDate()}（${
-      "日月火水木金土"[d.getDay()]
-    }）`;
-    const right = document.createElement("div");
-    right.textContent = plans || "予定少なめ / 調整しやすい";
-    right.style.color = plans ? "#38bdf8" : "#6b7280";
-
-    row.appendChild(left);
-    row.appendChild(right);
-    box.appendChild(row);
-  }
-}
-
-$("coordPrev").addEventListener("click", () => {
-  today.setDate(today.getDate() - 7);
-  renderCoord();
-});
-$("coordNext").addEventListener("click", () => {
-  today.setDate(today.getDate() + 7);
-  renderCoord();
-});
-
-// ===== 初期描画 =====
-renderDiaryMonth();
-renderDiaryList();
-renderSchedMonth();
-renderSchedList();
-renderCoord();
-
-// ===== PWA Service Worker 登録（既存 sw.js がある前提） =====
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js").catch(() => {});
-}
+  // 今日を選択してレンダリング
+  state.selDate = toISO(new Date());
+  renderCalendar();
+  renderScheduleMonth();
+  doSearch();
+})();
