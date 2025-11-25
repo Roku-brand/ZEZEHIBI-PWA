@@ -1,35 +1,40 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <title>是々日々</title>
+  <meta charset="UTF-8" />
   <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <meta name="theme-color" content="#02040a" />
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>是々日々 - 日々を整える個人用日記</title>
+
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- PWA manifest -->
   <link rel="manifest" href="manifest.webmanifest" />
+
+  <!-- iOS PWA アイコン -->
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
 </head>
+
 <body>
+
   <div class="app-root">
-    <!-- ヘッダー -->
-    <header class="top-bar">
-      <div>
+
+    <!-- ============================ -->
+    <!-- 📅 カレンダー画面 -->
+    <!-- ============================ -->
+    <section id="screenCalendar" class="screen screen-active">
+
+      <div class="top-bar">
         <div class="top-title">是々日々</div>
-        <div class="top-today" id="todayLabel"></div>
+        <div class="top-today" id="topTodayLabel"></div>
       </div>
-    </header>
 
-    <!-- メインエリア -->
-    <main class="main-area">
+      <div class="main-area">
 
-      <!-- ① カレンダー画面 -->
-      <section id="screen-calendar" class="screen screen-active">
-
-        <!-- 月ナビ -->
         <div class="month-header">
-          <button id="prevMonthBtn" class="nav-btn" aria-label="前の月へ">‹</button>
-          <div class="month-label" id="monthLabel"></div>
-          <button id="nextMonthBtn" class="nav-btn" aria-label="次の月へ">›</button>
+          <button id="prevMonth" class="nav-btn">‹</button>
+          <div id="monthLabel" class="month-label">2025年 1月</div>
+          <button id="nextMonth" class="nav-btn">›</button>
         </div>
 
         <!-- 曜日 -->
@@ -43,104 +48,147 @@
           <div class="wd sat">土</div>
         </div>
 
-        <!-- カレンダー本体 -->
+        <!-- カレンダーグリッド -->
         <div id="calendarGrid" class="calendar-grid"></div>
 
-        <!-- 選択中の情報（簡易） -->
-        <div class="day-summary" id="daySummary">
-          <span class="badge" id="summaryDateBadge"></span>
-          <span id="summaryText">日付をタップすると選択されます。ダブルタップで編集画面へ。</span>
-        </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- ② 閲覧・編集画面（フルページ） -->
-      <section id="screen-edit" class="screen">
+
+    <!-- ============================ -->
+    <!-- 📝 閲覧・編集画面 -->
+    <!-- ============================ -->
+    <section id="screenEdit" class="screen">
+
+      <div class="edit-wrapper">
+
+        <!-- 日付ヘッダー -->
         <div class="edit-header">
-          <button id="backToCalendarBtn" class="sub-btn small">‹ カレンダーへ</button>
-          <div class="edit-date-wrap">
-            <div class="edit-date-main" id="editDateMain"></div>
-            <div class="edit-date-sub" id="editDateSub"></div>
+          <div>
+            <div id="editDateLabel" class="edit-date-label">2025-01-01</div>
+            <div id="editDateSub" class="edit-date-sub">1月1日(水)</div>
+          </div>
+          <button id="editDateTodayBtn" class="sub-btn">今日に戻る</button>
+        </div>
+
+        <!-- 起床時間／食事／ニュース -->
+        <div class="edit-grid">
+          <div class="edit-field">
+            <label class="field-label">
+              起床時間
+              <input type="time" id="editWake" />
+            </label>
+          </div>
+          <div class="edit-field">
+            <label class="field-label">
+              朝食
+              <input type="text" id="editBreakfast" placeholder="例：トースト＋コーヒー" />
+            </label>
+          </div>
+          <div class="edit-field">
+            <label class="field-label">
+              昼食
+              <input type="text" id="editLunch" placeholder="例：学食カレー" />
+            </label>
+          </div>
+          <div class="edit-field">
+            <label class="field-label">
+              夕食
+              <input type="text" id="editDinner" placeholder="例：鍋、外食など" />
+            </label>
           </div>
         </div>
 
-        <div class="edit-body">
+        <div class="edit-field">
           <label class="field-label">
-            タイトル
-            <input id="editTitle" type="text" placeholder="例：アプリ開発をした" />
+            注目ニュース
+            <textarea id="editNews" rows="2" placeholder="今日気になったニュースなどを記録"></textarea>
           </label>
+        </div>
 
+        <div class="edit-field">
           <label class="field-label">
-            本文
-            <textarea id="editBody" rows="8"
-              placeholder="1日の出来事や感じたことを書いてください。"></textarea>
+            日記本文
+            <textarea id="editBody" rows="8" placeholder="その日の振り返りを書けます"></textarea>
           </label>
-
-          <div class="edit-actions">
-            <button id="deleteEntryBtn" class="danger-btn">削除</button>
-            <div class="flex-spacer"></div>
-            <button id="saveEntryBtn" class="primary-btn">保存</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- ③ 検索画面 -->
-      <section id="screen-search" class="screen">
-        <div class="section-header">
-          <h2>検索</h2>
-        </div>
-        <div class="search-panel">
-          <input id="searchInput" class="search-input"
-                 placeholder="キーワードで日記を検索" />
-        </div>
-        <div id="searchResults" class="search-grid"></div>
-      </section>
-
-      <!-- ④ 設定画面 -->
-      <section id="screen-settings" class="screen">
-        <div class="section-header">
-          <h2>設定</h2>
         </div>
 
-        <div class="card-list">
-          <!-- ログイン状態 -->
-          <article class="card">
-            <div class="card-title">アカウント</div>
-            <div class="card-sub" id="authStatus">未ログイン</div>
-            <div class="settings-actions">
-              <button id="loginBtn" class="primary-btn">Googleでログイン</button>
-              <button id="logoutBtn" class="sub-btn">ログアウト</button>
-            </div>
-          </article>
-
-          <!-- データのエクスポート / インポート -->
-          <article class="card">
-            <div class="card-title">データのバックアップ</div>
-            <div class="card-sub">
-              端末の全ての日記データを JSON 形式で書き出したり、読み込んだりできます。
-            </div>
-            <div class="settings-actions">
-              <button id="exportBtn" class="sub-btn">エクスポート</button>
-
-              <label class="import-label sub-btn">
-                インポート
-                <input id="importInput" type="file" accept="application/json" hidden />
-              </label>
-            </div>
-          </article>
+        <!-- 保存・削除 -->
+        <div class="edit-actions">
+          <button id="deleteEntryBtn" class="danger-btn" type="button">削除</button>
+          <div class="flex-spacer"></div>
+          <span id="saveStatus" class="save-status small">未保存</span>
+          <button id="saveEntryBtn" class="primary-btn" type="button">保存</button>
         </div>
-      </section>
-    </main>
 
-    <!-- 下タブ -->
-    <nav class="tab-bar">
-      <button class="tab-btn tab-active" data-target="calendar">カレンダー</button>
-      <button class="tab-btn" data-target="edit">閲覧・編集</button>
-      <button class="tab-btn" data-target="search">検索</button>
-      <button class="tab-btn" data-target="settings">設定</button>
-    </nav>
+      </div>
+    </section>
+
+
+    <!-- ============================ -->
+    <!-- 🔍 検索画面 -->
+    <!-- ============================ -->
+    <section id="screenSearch" class="screen">
+
+      <div class="section-header">
+        <h2>検索</h2>
+      </div>
+
+      <div class="search-panel">
+        <input id="searchInput" class="search-input" type="text" placeholder="日記を検索" />
+      </div>
+
+      <div id="searchResults" class="search-grid"></div>
+
+    </section>
+
+
+    <!-- ============================ -->
+    <!-- ⚙️ 設定画面 -->
+    <!-- ============================ -->
+    <section id="screenSettings" class="screen">
+
+      <div class="section-header">
+        <h2>設定</h2>
+      </div>
+
+      <div class="card-list">
+
+        <div class="card">
+          <div class="card-title">Googleログイン</div>
+          <div class="card-sub">端末間でデータを同期</div>
+          <button id="googleLoginBtn" class="primary-btn">ログインする</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">データエクスポート</div>
+          <button id="exportBtn" class="sub-btn">エクスポート</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">データインポート</div>
+          <input id="importFile" type="file" accept=".json" />
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ============================ -->
+    <!-- 🔘 タブバー -->
+    <!-- ============================ -->
+    <div class="tab-bar">
+      <button id="tabCalendar" class="tab-btn tab-active">カレンダー</button>
+      <button id="tabEdit" class="tab-btn">閲覧・編集</button>
+      <button id="tabSearch" class="tab-btn">検索</button>
+      <button id="tabSettings" class="tab-btn">設定</button>
+    </div>
+
   </div>
 
-  <!-- アプリ本体 -->
-  <script type="module" src="app.js"></script>
+  <!-- JS -->
+  <script src="app.js"></script>
+
 </body>
 </html>
