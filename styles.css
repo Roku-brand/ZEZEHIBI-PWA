@@ -1,7 +1,7 @@
 :root {
   --bg-main: #02040a;
-  --bg-card: #030712;
-  --bg-card-soft: #020617;
+  --bg-card: #0b1020;
+  --bg-card-soft: #111827;
   --accent: #38bdf8;
   --accent-soft: rgba(56, 189, 248, 0.16);
   --text-main: #e5e7eb;
@@ -11,8 +11,8 @@
   --radius-md: 14px;
   --radius-sm: 9px;
   --shadow-soft: 0 14px 38px rgba(0, 0, 0, 0.7);
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont,
-    -apple-system, "SF Pro Text", sans-serif;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    sans-serif;
 }
 
 /* リセット */
@@ -30,7 +30,6 @@ body {
   font-family: var(--font-sans);
   background: var(--bg-main);
   color: var(--text-main);
-  /* 横スクロール禁止・ダブルタップズーム抑制 */
   overflow-x: hidden;
   touch-action: manipulation;
 }
@@ -39,78 +38,66 @@ body {
   overscroll-behavior-y: contain;
 }
 
-/* ルート全体を縦フレックスにして「画面いっぱい」使う */
+/* ルートレイアウト */
 .app-root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background:
-    radial-gradient(circle at top, #020817 0, #02040a 40%, #010308 100%);
-  color: var(--text-main);
+  background: radial-gradient(circle at top, #020817 0, #02040a 40%, #010308 100%);
 }
 
-/* ヘッダー */
-.app-header {
-  padding: 12px 16px 4px;
+/* 上部バー */
+.top-bar {
+  padding: 10px 14px 2px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
 }
 
-.app-title {
-  font-size: 20px;
+.top-title {
+  font-size: 18px;
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
 }
 
-.app-sub {
-  margin-top: 2px;
+.top-today {
   font-size: 11px;
   color: var(--text-sub);
 }
 
-/* メインエリア（タブの上まで） */
+/* メインエリア全体 */
 .main-area {
   flex: 1;
-  padding: 0 8px 0;
-  display: flex;
-  position: relative;
+  padding: 0 6px 72px; /* 下タブぶん余白を確保 */
+  overflow: hidden;
 }
 
-/* 画面切り替え共通 */
+/* 各画面 */
 .screen {
   display: none;
-  width: 100%;
+  height: 100%;
 }
 
-/* アクティブ画面はフレックスで縦に伸ばす */
 .screen-active,
 .screen.active {
-  display: flex;
-  flex-direction: column;
+  display: block;
 }
 
 /* ===== カレンダー画面 ===== */
 
-#calendar-screen {
-  /* main-area の中で全体を使う */
-  flex: 1;
-}
-
-/* 上の日付バー */
-.today-bar {
+#calendarScreen {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  padding: 4px 2px 0;
-  font-size: 12px;
-  color: var(--text-sub);
+  flex-direction: column;
+  height: 100%;
 }
 
 /* 月ヘッダー */
 .month-header {
-  margin: 6px 0 4px;
-  padding: 6px 12px;
+  margin-top: 4px;
+  padding: 6px 10px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   border-radius: var(--radius-xl);
   background: linear-gradient(
     to right,
@@ -121,8 +108,8 @@ body {
 }
 
 .nav-btn {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   border-radius: 999px;
   border: none;
   background: rgba(9, 9, 15, 0.98);
@@ -130,22 +117,22 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .month-label {
   flex: 1;
   text-align: center;
   font-weight: 600;
-  font-size: 17px;
+  font-size: 16px;
 }
 
 /* 曜日行 */
 .weekday-row {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  padding: 4px 4px 2px;
-  font-size: 11px;
+  padding: 4px 6px 0;
+  font-size: 10px;
   color: var(--text-sub);
 }
 
@@ -161,23 +148,21 @@ body {
   color: #60a5fa;
 }
 
-/* ★ カレンダー全体を「びっしり」使うためのラッパー */
+/* カレンダーラッパー：上下方向の余白をカレンダーに配分 */
 .calendar-wrapper {
   flex: 1;
+  margin: 2px 4px 0;
   display: flex;
-  flex-direction: column;
-  min-height: 0; /* グリッドが縮められるのを防ぐ */
 }
 
-/* カレンダーグリッド：wrapper 内で余っている高さを全部使う */
+/* “びっしり”カレンダー本体 */
 .calendar-grid {
   flex: 1;
-  margin: 2px 0 6px;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-template-rows: repeat(6, 1fr); /* 高さを均等配分 */
+  grid-template-rows: repeat(6, 1fr);
   gap: 0;
-  border-radius: 18px;
+  border-radius: 16px;
   overflow: hidden;
   background: #02040a;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.75);
@@ -186,48 +171,48 @@ body {
 /* 日マス */
 .day-cell {
   position: relative;
-  padding: 3px 3px 2px;
-  border: 0.5px solid rgba(148, 163, 253, 0.14);
-  background: radial-gradient(circle at top, #020818 0, #02040a 60%);
-  font-size: 11px;
+  padding: 2px;
+  border: 0.4px solid rgba(148, 163, 253, 0.12);
+  background: radial-gradient(circle at top, #0b1220 0, #02040a 55%);
+  font-size: 10px;
   color: var(--text-main);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 2px;
 }
 
 .day-cell.out {
-  opacity: 0.25;
+  opacity: 0.24;
 }
 
 .day-num {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   text-align: right;
-  padding-right: 4px;
+  padding-right: 3px;
 }
 
 .day-cell.sun .day-num {
   color: #f97373;
 }
+
 .day-cell.sat .day-num {
   color: #60a5fa;
 }
 
 .day-cell.today {
   border-color: #38bdf8;
-  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.6);
 }
 
 .day-cell.selected {
-  background: linear-gradient(to bottom, #0b1120, #02040a);
-  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.8);
+  background: linear-gradient(to bottom, #111827, #02040a);
+  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.9);
 }
 
-/* 日マス内タイトル（3行まで） */
+/* 日マスのタイトル（3行まで） */
 .day-tags {
-  font-size: 8px;
+  font-size: 7.5px;
   line-height: 1.2;
   color: #93c5fd;
   overflow: hidden;
@@ -236,29 +221,75 @@ body {
   -webkit-line-clamp: 3;
 }
 
-/* 選択日サマリ（カレンダーの直下に固定） */
+/* 選択日のサマリ */
 .day-summary {
-  margin: 0 0 6px;
-  padding: 6px 10px;
-  border-radius: 14px;
-  background: rgba(6, 10, 19, 0.96);
+  margin: 8px 6px 4px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  background: rgba(6, 10, 19, 0.98);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7);
-  font-size: 11px;
   display: flex;
   align-items: center;
   gap: 10px;
+  font-size: 10px;
 }
 
 .badge {
-  padding: 3px 10px;
+  padding: 2px 8px;
   border-radius: 999px;
   background: rgba(15, 23, 42, 1);
   color: var(--accent);
   font-size: 10px;
 }
 
-/* ===== 共通カード・ボタン ===== */
+/* ===== 閲覧・編集画面 ===== */
 
+#editorScreen {
+  padding: 8px 4px 4px;
+  overflow-y: auto;
+}
+
+.editor-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.editor-date {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.editor-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
+.field-label input,
+.field-label textarea {
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 253, 0.24);
+  background: rgba(3, 7, 18, 0.98);
+  color: var(--text-main);
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+.field-label textarea {
+  resize: vertical;
+}
+
+/* ボタン共通 */
 .primary-btn,
 .sub-btn,
 .danger-btn {
@@ -284,40 +315,61 @@ body {
   color: #111827;
 }
 
-/* ===== 他タブ（閲覧・検索・設定） ===== */
+.modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.flex-spacer {
+  flex: 1;
+}
+
+/* ===== 検索・設定 ===== */
 
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 2px 4px;
+  padding: 8px 8px 2px;
 }
 
 .section-header h2 {
   margin: 0;
-  font-size: 15px;
+  font-size: 14px;
 }
 
-.section-sub {
+.search-panel {
+  padding: 0 8px 4px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 253, 0.28);
+  background: #02040a;
+  color: var(--text-main);
   font-size: 11px;
-  color: var(--text-sub);
 }
 
-.scroll-section {
-  flex: 1;
-  overflow-y: auto;
-  padding: 0 0 6px;
+.search-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 2px 6px 10px;
 }
 
 .card-list {
-  margin-top: 4px;
+  margin: 4px 6px 10px;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
 .card {
-  padding: 8px 10px;
+  padding: 6px 8px;
   border-radius: var(--radius-md);
   background: var(--bg-card);
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.7);
@@ -326,7 +378,7 @@ body {
 
 .card-title {
   font-weight: 600;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
 }
 
 .card-sub {
@@ -334,105 +386,28 @@ body {
   color: var(--text-sub);
 }
 
-/* 検索欄 */
-.search-panel {
-  padding: 0 0 6px;
-}
-
-.search-input {
-  width: 100%;
-  padding: 7px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 253, 0.3);
-  background: #02040a;
-  color: var(--text-main);
-  font-size: 11px;
-}
-
-/* ===== モーダル（日記編集画面など） ===== */
-
-.modal {
-  border: none;
-  padding: 0;
-  border-radius: 22px;
-  background: radial-gradient(circle at top, #020817, #02040a);
-  color: var(--text-main);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.95);
-}
-
-.modal::backdrop {
-  background: rgba(0, 0, 0, 0.68);
-}
-
-.modal-body {
-  padding: 14px 14px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 11px;
-}
-
-.field-label {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  font-size: 10px;
-  color: var(--text-sub);
-}
-
-.field-label input,
-.field-label textarea {
-  border-radius: 10px;
-  border: 1px solid rgba(148, 163, 253, 0.24);
-  background: rgba(3, 7, 18, 0.98);
-  color: var(--text-main);
-  padding: 6px 8px;
-  font-size: 11px;
-}
-
-.field-label textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-}
-
-.modal-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.flex-spacer {
-  flex: 1;
-}
-
-/* ===== タブバー ===== */
+/* ===== 下タブ ===== */
 
 .tab-bar {
   position: fixed;
   left: 10px;
   right: 10px;
   bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
-  height: 50px;
+  height: 48px;
   padding: 4px 6px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  border-radius: 20px;
+  gap: 4px;
+  border-radius: 18px;
   background: rgba(3, 6, 14, 0.98);
-  box-shadow: 0 -4px 22px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 -2px 18px rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(18px);
   z-index: 50;
 }
 
 .tab-btn {
   border: none;
+  padding: 4px 2px;
   border-radius: 14px;
   font-size: 11px;
   color: var(--text-sub);
@@ -440,7 +415,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 2px;
 }
 
 .tab-btn.tab-active,
