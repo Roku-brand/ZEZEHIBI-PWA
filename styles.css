@@ -11,8 +11,8 @@
   --radius-md: 14px;
   --radius-sm: 9px;
   --shadow-soft: 0 14px 38px rgba(0, 0, 0, 0.7);
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-    sans-serif;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, -apple-system,
+    "SF Pro Text", sans-serif;
 }
 
 /* リセット */
@@ -30,7 +30,9 @@ body {
   font-family: var(--font-sans);
   background: var(--bg-main);
   color: var(--text-main);
+  /* 横スクロール禁止 */
   overflow-x: hidden;
+  /* ダブルタップズームなど抑制 */
   touch-action: manipulation;
 }
 
@@ -38,26 +40,27 @@ body {
   overscroll-behavior-y: contain;
 }
 
-/* ルートレイアウト */
+/* ルート */
 .app-root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background: radial-gradient(circle at top, #020817 0, #02040a 40%, #010308 100%);
+  color: var(--text-main);
 }
 
-/* 上部バー */
+/* ヘッダー */
 .top-bar {
-  padding: 10px 14px 2px;
+  padding: 10px 14px 4px;
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .top-title {
   font-size: 18px;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.18em;
 }
 
 .top-today {
@@ -65,36 +68,38 @@ body {
   color: var(--text-sub);
 }
 
-/* メインエリア全体 */
+/* メインエリア：縦方向をフルに使う */
 .main-area {
   flex: 1;
-  padding: 0 6px 72px; /* 下タブぶん余白を確保 */
+  padding: 0;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
-/* 各画面 */
+/* 画面切り替え */
 .screen {
   display: none;
-  height: 100%;
 }
 
 .screen-active,
 .screen.active {
-  display: block;
-}
-
-/* ===== カレンダー画面 ===== */
-
-#screenCalendar {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+}
+
+/* --- カレンダースクリーン --- */
+#calendarScreen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 月ヘッダー */
 .month-header {
-  margin-top: 4px;
-  padding: 6px 10px;
+  margin: 2px 10px 4px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -108,8 +113,8 @@ body {
 }
 
 .nav-btn {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   border-radius: 999px;
   border: none;
   background: rgba(9, 9, 15, 0.98);
@@ -117,7 +122,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .month-label {
@@ -127,12 +132,16 @@ body {
   font-size: 16px;
 }
 
-/* 曜日行 */
+.month-label.small {
+  font-size: 13px;
+}
+
+/* 曜日 */
 .weekday-row {
+  margin: 4px 12px 0;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  padding: 4px 6px 0;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-sub);
 }
 
@@ -148,21 +157,22 @@ body {
   color: #60a5fa;
 }
 
-/* カレンダーラッパー：上下方向の余白をカレンダーに配分 */
-.calendar-wrapper {
+/* カレンダー全体をフル画面に近づけるラッパー */
+.calendar-shell {
   flex: 1;
-  margin: 2px 4px 0;
   display: flex;
+  padding: 2px 8px 0;
 }
 
-/* “びっしり”カレンダー本体 */
+/* カレンダー本体（グリッド） */
 .calendar-grid {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  /* 6行固定で、縦方向をびっしり使う */
   grid-template-rows: repeat(6, 1fr);
   gap: 0;
-  border-radius: 16px;
+  border-radius: 18px;
   overflow: hidden;
   background: #02040a;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.75);
@@ -171,14 +181,15 @@ body {
 /* 日マス */
 .day-cell {
   position: relative;
-  padding: 2px;
-  border: 0.4px solid rgba(148, 163, 253, 0.12);
+  padding: 3px 4px 2px;
+  border: 0.4px solid rgba(148, 163, 253, 0.18);
   background: radial-gradient(circle at top, #0b1220 0, #02040a 55%);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-main);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  gap: 2px;
 }
 
 .day-cell.out {
@@ -186,16 +197,15 @@ body {
 }
 
 .day-num {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   text-align: right;
-  padding-right: 3px;
+  padding-right: 4px;
 }
 
 .day-cell.sun .day-num {
   color: #f97373;
 }
-
 .day-cell.sat .day-num {
   color: #60a5fa;
 }
@@ -210,9 +220,9 @@ body {
   box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.9);
 }
 
-/* 日マスのタイトル（3行まで） */
+/* 日マス内タイトル（最大3行） */
 .day-tags {
-  font-size: 7.5px;
+  font-size: 8px;
   line-height: 1.2;
   color: #93c5fd;
   overflow: hidden;
@@ -221,81 +231,35 @@ body {
   -webkit-line-clamp: 3;
 }
 
-/* 選択日のサマリ */
+/* 選択日サマリ（カレンダーの下、常に高さ固定） */
 .day-summary {
-  margin: 8px 6px 4px;
-  padding: 6px 8px;
-  border-radius: 12px;
+  flex-shrink: 0;
+  margin: 8px 10px 6px;
+  padding: 8px 10px;
+  border-radius: 14px;
   background: rgba(6, 10, 19, 0.98);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .badge {
-  padding: 2px 8px;
+  padding: 2px 10px;
   border-radius: 999px;
   background: rgba(15, 23, 42, 1);
   color: var(--accent);
-  font-size: 10px;
-}
-
-/* ===== 閲覧・編集画面 ===== */
-
-#screenEdit {
-  padding: 8px 4px 4px;
-  overflow-y: auto;
-}
-
-.editor-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.editor-date {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.editor-form {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.field-label {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
   font-size: 11px;
-  color: var(--text-sub);
 }
 
-.field-label input,
-.field-label textarea {
-  border-radius: 10px;
-  border: 1px solid rgba(148, 163, 253, 0.24);
-  background: rgba(3, 7, 18, 0.98);
-  color: var(--text-main);
-  padding: 6px 8px;
-  font-size: 12px;
-}
-
-.field-label textarea {
-  resize: vertical;
-}
-
-/* ボタン共通 */
+/* ボタン */
 .primary-btn,
 .sub-btn,
 .danger-btn {
   border: none;
   border-radius: 999px;
-  padding: 6px 12px;
+  padding: 5px 10px;
   font-size: 11px;
   cursor: pointer;
 }
@@ -315,38 +279,133 @@ body {
   color: #111827;
 }
 
+/* --- 閲覧・編集／検索など共通カード --- */
+.card-list {
+  margin: 8px 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card {
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.7);
+  font-size: 11px;
+}
+
+.card-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.card-sub {
+  font-size: 10px;
+  color: var(--text-sub);
+}
+
+/* --- モーダル（日記作成・編集） --- */
+.modal {
+  border: none;
+  padding: 0;
+  border-radius: 22px;
+  background: radial-gradient(circle at top, #020817, #02040a);
+  color: var(--text-main);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.95);
+  max-width: 520px;
+}
+
+.modal::backdrop {
+  background: rgba(0, 0, 0, 0.68);
+}
+
+.modal-body {
+  padding: 14px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 10px;
+  color: var(--text-sub);
+}
+
+.field-label strong {
+  color: var(--text-main);
+  font-size: 11px;
+}
+
+.field-label input,
+.field-label textarea {
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 253, 0.24);
+  background: rgba(3, 7, 18, 0.98);
+  color: var(--text-main);
+  padding: 6px 8px;
+  font-size: 11px;
+}
+
+.field-label textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
 .modal-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 4px;
+  gap: 8px;
+  margin-top: 6px;
 }
 
 .flex-spacer {
   flex: 1;
 }
 
-/* ===== 検索・設定 ===== */
+.field-inline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+}
 
+/* --- 検索 --- */
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 8px 2px;
+  padding: 10px 12px 4px;
 }
 
 .section-header h2 {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .search-panel {
-  padding: 0 8px 4px;
+  padding: 0 12px 8px;
 }
 
 .search-input {
   width: 100%;
-  padding: 6px 10px;
+  padding: 7px 12px;
   border-radius: 999px;
   border: 1px solid rgba(148, 163, 253, 0.28);
   background: #02040a;
@@ -358,57 +417,63 @@ body {
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
-  padding: 2px 6px 10px;
+  padding: 0 10px 14px;
 }
 
-.card-list {
-  margin: 4px 6px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.card {
-  padding: 6px 8px;
-  border-radius: var(--radius-md);
-  background: var(--bg-card);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.7);
+.sub-heading {
+  margin: 0 0 4px;
   font-size: 11px;
-}
-
-.card-title {
-  font-weight: 600;
-  margin-bottom: 2px;
-}
-
-.card-sub {
-  font-size: 10px;
   color: var(--text-sub);
 }
 
-/* ===== 下タブ ===== */
+/* --- 調整タブなど --- */
+.coord-header {
+  margin: 8px 10px 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 
+.bands-list {
+  margin: 4px 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 10px;
+}
+
+.band-row {
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: var(--bg-card-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* --- タブバー：ホームバーと被らないように浮かせる --- */
 .tab-bar {
   position: fixed;
   left: 10px;
   right: 10px;
   bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
-  height: 48px;
-  padding: 4px 6px;
+  height: 52px;
+  padding: 6px 6px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  border-radius: 18px;
+  gap: 6px;
+  border-radius: 20px;
   background: rgba(3, 6, 14, 0.98);
   box-shadow: 0 -2px 18px rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(18px);
   z-index: 50;
 }
 
+/* タブボタン */
 .tab-btn {
   border: none;
-  padding: 4px 2px;
-  border-radius: 14px;
+  padding: 4px 4px;
+  border-radius: 999px;
   font-size: 11px;
   color: var(--text-sub);
   background: transparent;
