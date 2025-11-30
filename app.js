@@ -101,13 +101,15 @@
   }
 
   // ---- 画面制御 ----
+  // ID名をHTMLと合わせる
   const screenCalendar = $("screenCalendar");
   const screenEdit = $("screenEdit");
   const screenSearch = $("screenSearch");
   const screenSettings = $("screenSettings");
 
+  // タブID
   const tabCalendar = $("tabCalendar");
-  const tabEdit = $("tabEdit");
+  const tabEdit = $("tabEdit"); // HTMLのIDを修正
   const tabSearch = $("tabSearch");
   const tabSettings = $("tabSettings");
 
@@ -136,6 +138,7 @@
     if (name === "edit") renderEditScreen();
   }
 
+  // イベントリスナーはID変更に合わせて修正
   tabCalendar.addEventListener("click", () => {
     showScreen("calendar");
   });
@@ -152,10 +155,10 @@
 
   // ---- カレンダー描画 ----
   const calendarGrid = $("calendarGrid");
-  const prevMonthBtn = $("prevMonth");
-  const nextMonthBtn = $("nextMonth");
+  const prevMonthBtn = $("prevMonthBtn"); // HTMLのIDを修正
+  const nextMonthBtn = $("nextMonthBtn"); // HTMLのIDを修正
   const monthLabel = $("monthLabel");
-  const topTodayLabel = $("topTodayLabel");
+  const topTodayLabel = $("topTodayLabel"); // HTMLのIDを修正
 
   function renderCalendar() {
     const year = state.viewYear;
@@ -268,17 +271,17 @@
 
   // ---- 閲覧・編集画面 ----
   const editDateLabel = $("editDateLabel");
-  const editDateSub = $("editDateSub");
-  const editWake = $("editWake");
-  const editBreakfast = $("editBreakfast");
-  const editLunch = $("editLunch");
-  const editDinner = $("editDinner");
-  const editNews = $("editNews");
-  const editBody = $("editBody");
-  const editDateTodayBtn = $("editDateTodayBtn");
+  const editDateSub = $("editDateSub"); // ★追加：HTMLに要素を追加
+  const editWake = $("editWake"); // HTMLのIDを修正
+  const editBreakfast = $("editBreakfast"); // HTMLのIDを修正
+  const editLunch = $("editLunch"); // HTMLのIDを修正
+  const editDinner = $("editDinner"); // HTMLのIDを修正
+  const editNews = $("editNews"); // HTMLのIDを修正
+  const editBody = $("editBody"); // HTMLのIDを修正
+  const editDateTodayBtn = $("editDateTodayBtn"); // ★追加：HTMLに要素を追加
   const deleteEntryBtn = $("deleteEntryBtn");
-  const saveEntryBtn = $("saveEntryBtn");
-  const saveStatus = $("saveStatus");
+  const saveEntryBtn = $("saveEntryBtn"); // ★追加：HTMLにIDを追加
+  const saveStatus = $("saveStatus"); // ★追加：HTMLにIDを追加
 
   function renderEditScreen() {
     const date = state.currentDate;
@@ -306,6 +309,12 @@
     saveStatus.textContent = "未保存";
   }
 
+  // 「カレンダーへ戻る」ボタンの処理を追加
+  $("editorBackBtn").addEventListener("click", () => {
+    showScreen("calendar");
+  });
+
+  // 「今日」ボタンの処理
   editDateTodayBtn.addEventListener("click", () => {
     state.currentDate = todayISO();
     state.viewYear = new Date().getFullYear();
@@ -430,7 +439,7 @@
   // ---- 設定：Googleログイン（ダミー）・エクスポート・インポート ----
   const googleLoginBtn = $("googleLoginBtn");
   const exportBtn = $("exportBtn");
-  const importFile = $("importFile");
+  const importFile = $("importFile"); // HTMLのIDを修正
 
   googleLoginBtn.addEventListener("click", () => {
     alert("Googleログイン／同期は今後 Firebase 連携で実装予定です。いまはローカル保存のみです。");
@@ -489,6 +498,9 @@
 
     renderCalendar();
     renderEditScreen();
+    
+    // アプリ起動時はカレンダー画面を表示
+    showScreen("calendar");
   }
 
   document.addEventListener("DOMContentLoaded", init);
