@@ -48,6 +48,11 @@
     })[c]);
   }
 
+  function formatWeight(weight) {
+    if (!weight) return "";
+    return `⚖${weight}kg`;
+  }
+
   // ---- データ管理 ----
   let db = loadDB();
   let state = {
@@ -220,7 +225,7 @@
       if (entry) {
         const parts = [];
         if (entry.wake) parts.push(`☀${entry.wake}`);
-        if (entry.weight) parts.push(`⚖${entry.weight}kg`);
+        if (entry.weight) parts.push(formatWeight(entry.weight));
         if (entry.breakfast) parts.push("朝: " + entry.breakfast);
         if (entry.lunch) parts.push("昼: " + entry.lunch);
         if (entry.dinner) parts.push("夜: " + entry.dinner);
@@ -330,9 +335,15 @@
 
   saveEntryBtn.addEventListener("click", () => {
     const date = state.currentDate;
+    const weightValue = editWeight.value.trim();
+    // Validate weight: must be empty or a valid positive number
+    if (weightValue && (isNaN(weightValue) || parseFloat(weightValue) < 0)) {
+      alert("体重は0以上の数値を入力してください。");
+      return;
+    }
     upsertEntry(date, {
       wake: editWake.value.trim(),
-      weight: editWeight.value.trim(),
+      weight: weightValue,
       breakfast: editBreakfast.value.trim(),
       lunch: editLunch.value.trim(),
       dinner: editDinner.value.trim(),
@@ -417,7 +428,7 @@
         sub.className = "card-sub";
         const summaryParts = [];
         if (e.wake) summaryParts.push(`☀${e.wake}`);
-        if (e.weight) summaryParts.push(`⚖${e.weight}kg`);
+        if (e.weight) summaryParts.push(formatWeight(e.weight));
         if (e.breakfast) summaryParts.push("朝:" + e.breakfast);
         if (e.lunch) summaryParts.push("昼:" + e.lunch);
         if (e.dinner) summaryParts.push("夜:" + e.dinner);
