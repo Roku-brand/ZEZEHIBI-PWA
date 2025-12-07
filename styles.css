@@ -471,3 +471,58 @@ body {
   height: 0;
 }
 
+/* ===== トップバー ===== */
+.top-bar {
+  padding: 10px 12px 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.top-title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+}
+
+.top-today {
+  font-size: 10px;
+  color: var(--text-sub);
+  margin-top: 2px;
+}
+
+/* ===== 編集画面 ===== */
+.editor-header {
+  padding: 10px 8px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  margin-bottom: 10px;
+}
+
+.editor-date {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.editor-form {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 8px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ===== 検索結果グリッド ===== */
+.search-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 0 6px;
+}
+
