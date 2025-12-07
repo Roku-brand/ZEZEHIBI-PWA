@@ -85,6 +85,7 @@
     db.entries[date] = {
       date,
       wake: partial.wake ?? prev.wake ?? "",
+      weight: partial.weight ?? prev.weight ?? "",
       breakfast: partial.breakfast ?? prev.breakfast ?? "",
       lunch: partial.lunch ?? prev.lunch ?? "",
       dinner: partial.dinner ?? prev.dinner ?? "",
@@ -219,6 +220,7 @@
       if (entry) {
         const parts = [];
         if (entry.wake) parts.push(`☀${entry.wake}`);
+        if (entry.weight) parts.push(`⚖${entry.weight}kg`);
         if (entry.breakfast) parts.push("朝: " + entry.breakfast);
         if (entry.lunch) parts.push("昼: " + entry.lunch);
         if (entry.dinner) parts.push("夜: " + entry.dinner);
@@ -273,6 +275,7 @@
   const editDateLabel = $("editDateLabel");
   const editDateSub = $("editDateSub"); // ★追加：HTMLに要素を追加
   const editWake = $("editWake"); // HTMLのIDを修正
+  const editWeight = $("editWeight");
   const editBreakfast = $("editBreakfast"); // HTMLのIDを修正
   const editLunch = $("editLunch"); // HTMLのIDを修正
   const editDinner = $("editDinner"); // HTMLのIDを修正
@@ -291,6 +294,7 @@
     const entry = getEntry(date);
     if (entry) {
       editWake.value = entry.wake || "";
+      editWeight.value = entry.weight || "";
       editBreakfast.value = entry.breakfast || "";
       editLunch.value = entry.lunch || "";
       editDinner.value = entry.dinner || "";
@@ -299,6 +303,7 @@
       deleteEntryBtn.disabled = false;
     } else {
       editWake.value = "";
+      editWeight.value = "";
       editBreakfast.value = "";
       editLunch.value = "";
       editDinner.value = "";
@@ -327,6 +332,7 @@
     const date = state.currentDate;
     upsertEntry(date, {
       wake: editWake.value.trim(),
+      weight: editWeight.value.trim(),
       breakfast: editBreakfast.value.trim(),
       lunch: editLunch.value.trim(),
       dinner: editDinner.value.trim(),
@@ -377,6 +383,7 @@
         [
           e.date,
           e.wake,
+          e.weight,
           e.breakfast,
           e.lunch,
           e.dinner,
@@ -410,6 +417,7 @@
         sub.className = "card-sub";
         const summaryParts = [];
         if (e.wake) summaryParts.push(`☀${e.wake}`);
+        if (e.weight) summaryParts.push(`⚖${e.weight}kg`);
         if (e.breakfast) summaryParts.push("朝:" + e.breakfast);
         if (e.lunch) summaryParts.push("昼:" + e.lunch);
         if (e.dinner) summaryParts.push("夜:" + e.dinner);
