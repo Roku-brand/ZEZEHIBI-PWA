@@ -336,10 +336,13 @@
   saveEntryBtn.addEventListener("click", () => {
     const date = state.currentDate;
     const weightValue = editWeight.value.trim();
-    // Validate weight: must be empty or a valid positive number
-    if (weightValue && (isNaN(weightValue) || parseFloat(weightValue) < 0)) {
-      alert("体重は0以上の数値を入力してください。");
-      return;
+    // Validate weight: must be empty or a valid non-negative number
+    if (weightValue) {
+      const weightNum = Number(weightValue);
+      if (!isFinite(weightNum) || weightNum < 0) {
+        alert("体重は0以上の数値を入力してください。");
+        return;
+      }
     }
     upsertEntry(date, {
       wake: editWake.value.trim(),
