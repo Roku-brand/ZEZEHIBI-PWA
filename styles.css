@@ -239,8 +239,8 @@ body {
 
 /* 日マス内タイトル（3行まで） */
 .day-tags {
-  font-size: 8px;
-  line-height: 1.2;
+  font-size: 10px;
+  line-height: 1.3;
   color: #4F7FD6;
   overflow: hidden;
   display: -webkit-box;
