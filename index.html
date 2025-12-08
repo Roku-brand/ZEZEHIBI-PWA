@@ -45,21 +45,23 @@
 
         <section id="screenEdit" class="screen">
           <div class="editor-header">
-            <button id="editorBackBtn" class="sub-btn">&larr; カレンダーへ戻る</button>
             <div class="editor-date" id="editDateLabel">-</div>
             <div class="editor-date" id="editDateSub"></div>
             <button id="editDateTodayBtn" class="sub-btn">今日</button> 
           </div>
 
           <form id="diaryForm" class="editor-form">
-            <label class="field-label">
-              <span>起床時間</span>
-              <input type="time" id="editWake" /> </label>
+            <div class="grid-2">
+              <label class="field-label">
+                <span>起床時間</span>
+                <input type="time" id="editWake" />
+              </label>
 
-            <label class="field-label">
-              <span>体重 (kg)</span>
-              <input type="number" id="editWeight" step="0.1" min="0" max="500" placeholder="例：65.5" />
-            </label>
+              <label class="field-label">
+                <span>体重 (kg)</span>
+                <input type="number" id="editWeight" step="0.1" min="0" max="500" placeholder="例：65.5" />
+              </label>
+            </div>
 
             <div class="meals-grid">
               <label class="field-label">
@@ -93,6 +95,15 @@
                 id="editNews" rows="2"
                 placeholder="気になったニュース・出来事をメモ"
               ></textarea>
+            </label>
+
+            <label class="field-label">
+              <span>タイトル</span>
+              <input
+                type="text"
+                id="editTitle"
+                placeholder="例：楽しい一日"
+              />
             </label>
 
             <label class="field-label">

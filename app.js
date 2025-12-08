@@ -95,6 +95,7 @@
       lunch: partial.lunch ?? prev.lunch ?? "",
       dinner: partial.dinner ?? prev.dinner ?? "",
       news: partial.news ?? prev.news ?? "",
+      title: partial.title ?? prev.title ?? "",
       body: partial.body ?? prev.body ?? "",
       updatedAt: now,
     };
@@ -223,17 +224,22 @@
 
       const entry = getEntry(cellIso);
       if (entry) {
-        const parts = [];
-        if (entry.wake) parts.push(`☀${entry.wake}`);
-        if (entry.weight) parts.push(formatWeight(entry.weight));
-        if (entry.breakfast) parts.push("朝: " + entry.breakfast);
-        if (entry.lunch) parts.push("昼: " + entry.lunch);
-        if (entry.dinner) parts.push("夜: " + entry.dinner);
-        if (entry.news) parts.push("📰 " + entry.news);
-        if (!parts.length && entry.body) {
-          parts.push(entry.body.slice(0, 30));
+        // タイトルがあればそれを表示、なければデフォルトの情報を表示
+        if (entry.title) {
+          tags.textContent = entry.title;
+        } else {
+          const parts = [];
+          if (entry.wake) parts.push(`☀${entry.wake}`);
+          if (entry.weight) parts.push(formatWeight(entry.weight));
+          if (entry.breakfast) parts.push("朝: " + entry.breakfast);
+          if (entry.lunch) parts.push("昼: " + entry.lunch);
+          if (entry.dinner) parts.push("夜: " + entry.dinner);
+          if (entry.news) parts.push("📰 " + entry.news);
+          if (!parts.length && entry.body) {
+            parts.push(entry.body.slice(0, 30));
+          }
+          tags.textContent = parts.join(" / ");
         }
-        tags.textContent = parts.join(" / ");
       } else {
         tags.textContent = "";
       }
@@ -285,6 +291,7 @@
   const editLunch = $("editLunch"); // HTMLのIDを修正
   const editDinner = $("editDinner"); // HTMLのIDを修正
   const editNews = $("editNews"); // HTMLのIDを修正
+  const editTitle = $("editTitle"); // ★追加：タイトル入力欄
   const editBody = $("editBody"); // HTMLのIDを修正
   const editDateTodayBtn = $("editDateTodayBtn"); // ★追加：HTMLに要素を追加
   const deleteEntryBtn = $("deleteEntryBtn");
@@ -304,6 +311,7 @@
       editLunch.value = entry.lunch || "";
       editDinner.value = entry.dinner || "";
       editNews.value = entry.news || "";
+      editTitle.value = entry.title || "";
       editBody.value = entry.body || "";
       deleteEntryBtn.disabled = false;
     } else {
@@ -313,16 +321,12 @@
       editLunch.value = "";
       editDinner.value = "";
       editNews.value = "";
+      editTitle.value = "";
       editBody.value = "";
       deleteEntryBtn.disabled = true;
     }
     saveStatus.textContent = "未保存";
   }
-
-  // 「カレンダーへ戻る」ボタンの処理を追加
-  $("editorBackBtn").addEventListener("click", () => {
-    showScreen("calendar");
-  });
 
   // 「今日」ボタンの処理
   editDateTodayBtn.addEventListener("click", () => {
@@ -351,6 +355,7 @@
       lunch: editLunch.value.trim(),
       dinner: editDinner.value.trim(),
       news: editNews.value.trim(),
+      title: editTitle.value.trim(),
       body: editBody.value.trim(),
     });
     renderCalendar();
@@ -402,6 +407,7 @@
           e.lunch,
           e.dinner,
           e.news,
+          e.title,
           e.body,
         ]
           .join(" ")
