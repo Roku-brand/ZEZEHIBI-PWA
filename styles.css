@@ -415,6 +415,32 @@ body {
   gap: 6px;
 }
 
+.meals-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.meals-grid .field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.meals-grid .field-label span {
+  font-size: 10px;
+  color: var(--text-sub);
+}
+
+.meals-grid .field-label input {
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: #FFFFFF;
+  color: var(--text-main);
+  padding: 6px 8px;
+  font-size: 11px;
+}
+
 .modal-actions {
   display: flex;
   align-items: center;
