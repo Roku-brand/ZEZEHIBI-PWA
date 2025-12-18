@@ -97,6 +97,7 @@
       news: partial.news ?? prev.news ?? "",
       title: partial.title ?? prev.title ?? "",
       body: partial.body ?? prev.body ?? "",
+      idea: partial.idea ?? prev.idea ?? "",
       updatedAt: now,
     };
     saveDB();
@@ -235,6 +236,7 @@
           if (entry.lunch) parts.push("昼: " + entry.lunch);
           if (entry.dinner) parts.push("夜: " + entry.dinner);
           if (entry.news) parts.push("📰 " + entry.news);
+          if (entry.idea) parts.push("💡 " + entry.idea);
           if (!parts.length && entry.body) {
             parts.push(entry.body.slice(0, 30));
           }
@@ -293,6 +295,7 @@
   const editNews = $("editNews"); // HTMLのIDを修正
   const editTitle = $("editTitle"); // ★追加：タイトル入力欄
   const editBody = $("editBody"); // HTMLのIDを修正
+  const editIdea = $("editIdea");
   const editDateTodayBtn = $("editDateTodayBtn"); // ★追加：HTMLに要素を追加
   const deleteEntryBtn = $("deleteEntryBtn");
   const saveEntryBtn = $("saveEntryBtn"); // ★追加：HTMLにIDを追加
@@ -313,6 +316,7 @@
       editNews.value = entry.news || "";
       editTitle.value = entry.title || "";
       editBody.value = entry.body || "";
+      editIdea.value = entry.idea || "";
       deleteEntryBtn.disabled = false;
     } else {
       editWake.value = "";
@@ -323,6 +327,7 @@
       editNews.value = "";
       editTitle.value = "";
       editBody.value = "";
+      editIdea.value = "";
       deleteEntryBtn.disabled = true;
     }
     saveStatus.textContent = "未保存";
@@ -357,6 +362,7 @@
       news: editNews.value.trim(),
       title: editTitle.value.trim(),
       body: editBody.value.trim(),
+      idea: editIdea.value.trim(),
     });
     renderCalendar();
     saveStatus.textContent = "保存しました";
@@ -409,6 +415,7 @@
           e.news,
           e.title,
           e.body,
+          e.idea,
         ]
           .join(" ")
           .toLowerCase() || "";
@@ -442,6 +449,7 @@
         if (e.lunch) summaryParts.push("昼:" + e.lunch);
         if (e.dinner) summaryParts.push("夜:" + e.dinner);
         if (e.news) summaryParts.push("📰" + e.news);
+        if (e.idea) summaryParts.push("💡" + e.idea);
         if (summaryParts.length === 0 && e.body) {
           summaryParts.push(e.body.slice(0, 40));
         }
