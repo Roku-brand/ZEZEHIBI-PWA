@@ -16,10 +16,9 @@ const APP_SHELL = [
   './app.js',
   './offline.html',
   './manifest.webmanifest',
-  // アイコン（存在しない場合はコメントアウトOK）
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/maskable-512.png',
+  './icons/apple-touch-icon.png',
 ];
 
 /* ---- インストール：アプリシェルをキャッシュ ---- */

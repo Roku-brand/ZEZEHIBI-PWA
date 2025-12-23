@@ -1,24 +1,25 @@
 {
   "name": "是々日々",
   "short_name": "是々日々",
-  "start_url": "/",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#F5F7F4",
   "theme_color": "#F5F7F4",
   "description": "日々を静かに見つめ直す、最小で最大の個人用アプリ。",
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "./icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "./icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     },
     {
-      "src": "icons/apple-touch-icon.png",
+      "src": "./icons/apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "maskable any"
