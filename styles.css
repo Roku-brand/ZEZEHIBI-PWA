@@ -459,8 +459,8 @@ body {
   left: 10px;
   right: 10px;
   bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
-  height: 50px;
-  padding: 4px 6px;
+  height: 60px;
+  padding: 6px 8px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 6px;
@@ -475,13 +475,14 @@ body {
 .tab-btn {
   border: none;
   border-radius: 14px;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--text-sub);
   background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 2px;
+  padding: 8px 4px;
+  font-weight: 500;
 }
 
 .tab-btn.tab-active,
@@ -550,5 +551,89 @@ body {
   flex-direction: column;
   gap: 6px;
   padding: 0 0 6px;
+}
+
+/* ===== アイデアライブラリ ===== */
+.idea-library-controls {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+  align-items: center;
+}
+
+.idea-category-select {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: #FFFFFF;
+  color: var(--text-main);
+  font-size: 11px;
+}
+
+.idea-library-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.idea-item {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--bg-card-soft);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.idea-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.idea-category-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.idea-category-badge.failure { background: #FEE2E2; color: #991B1B; }
+.idea-category-badge.aruaru { background: #FEF3C7; color: #92400E; }
+.idea-category-badge.thinking { background: #DBEAFE; color: #1E40AF; }
+.idea-category-badge.knowledge { background: #D1FAE5; color: #065F46; }
+.idea-category-badge.other { background: #E5E7EB; color: #374151; }
+
+.idea-item-content {
+  color: var(--text-main);
+  line-height: 1.4;
+}
+
+.idea-item-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.idea-delete-btn {
+  padding: 3px 8px;
+  border: none;
+  border-radius: 6px;
+  font-size: 10px;
+  background: #FEE2E2;
+  color: #991B1B;
+  cursor: pointer;
+}
+
+/* 管理画面のスクロール対応 */
+#screenSettings .scroll-section {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 80px;
 }
 
