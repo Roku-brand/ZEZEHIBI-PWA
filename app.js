@@ -563,9 +563,16 @@
     // シンプルなローカルログイン（実際のGoogleログインの代わり）
     const email = prompt("メールアドレスを入力してください（ローカル保存用）:");
     if (email && email.trim()) {
+      // 基本的なメール形式のバリデーション
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const trimmedEmail = email.trim();
+      if (!emailPattern.test(trimmedEmail)) {
+        alert("有効なメールアドレスを入力してください。");
+        return;
+      }
       authState.isLoggedIn = true;
       authState.user = { 
-        email: email.trim(),
+        email: trimmedEmail,
         loginAt: Date.now()
       };
       saveAuthState();
@@ -706,8 +713,16 @@
           // 既存のアイデアとマージ（IDで重複排除）
           const existingIds = new Set(ideasDB.ideas.map(i => i.id));
           imported.ideas.forEach(idea => {
-            if (!existingIds.has(idea.id)) {
-              ideasDB.ideas.push(idea);
+            // 必須フィールドのバリデーション
+            if (idea && typeof idea === "object" && idea.id && idea.category && idea.content) {
+              if (!existingIds.has(idea.id)) {
+                ideasDB.ideas.push({
+                  id: String(idea.id),
+                  category: String(idea.category),
+                  content: String(idea.content),
+                  createdAt: idea.createdAt || Date.now()
+                });
+              }
             }
           });
           saveIdeasDB();
