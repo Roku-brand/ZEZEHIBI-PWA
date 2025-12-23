@@ -25,16 +25,6 @@
     knowledge: "＃教養",
     other: "＃その他"
   };
-  
-  // カテゴリの色設定
-  const CATEGORY_COLORS = {
-    failure: { bg: "#FEE2E2", text: "#991B1B" },
-    aruaru: { bg: "#FEF3C7", text: "#92400E" },
-    thinking: { bg: "#DBEAFE", text: "#1E40AF" },
-    knowledge: { bg: "#D1FAE5", text: "#065F46" },
-    other: { bg: "#E5E7EB", text: "#374151" },
-    custom: { bg: "#F3E8FF", text: "#6B21A8" }
-  };
 
   const $ = (id) => document.getElementById(id);
 
@@ -152,12 +142,12 @@
   
   // カテゴリがデフォルトかどうか
   function isDefaultCategory(categoryId) {
-    return Object.prototype.hasOwnProperty.call(DEFAULT_CATEGORIES, categoryId);
+    return Object.hasOwn(DEFAULT_CATEGORIES, categoryId);
   }
   
   // カスタムカテゴリを追加
   function addCategory(name) {
-    const id = "custom_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const id = "custom_" + crypto.randomUUID();
     categoriesDB.categories[id] = "＃" + name;
     saveCategoriesDB();
     return id;
