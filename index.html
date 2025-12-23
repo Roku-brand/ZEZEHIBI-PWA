@@ -14,13 +14,6 @@
   </head>
   <body>
     <div class="app-root">
-      <header class="top-bar">
-        <div>
-          <div class="top-title">是々日々</div>
-          <div class="top-today" id="topTodayLabel"></div>
-        </div>
-      </header>
-
       <main class="main-area">
         <section id="screenCalendar" class="screen screen-active">
           <div class="month-header">
@@ -156,10 +149,54 @@
 
         <section id="screenSettings" class="screen">
           <div class="section-header">
-            <h2>設定</h2>
+            <h2>管理</h2>
           </div>
 
-          <div class="card-list">
+          <div class="card-list scroll-section">
+            <!-- アイデア・トーク種ライブラリ -->
+            <div class="card">
+              <div class="card-title">アイデア・トーク種ライブラリ</div>
+              <div class="card-sub">
+                アイデアやトーク種をカテゴリ別に管理できます。
+              </div>
+              <div class="idea-library-controls">
+                <select id="ideaCategorySelect" class="idea-category-select">
+                  <option value="all">すべて</option>
+                  <option value="failure">＃自分の失敗</option>
+                  <option value="aruaru">＃〇〇のあるある</option>
+                  <option value="thinking">＃考え方</option>
+                  <option value="knowledge">＃教養</option>
+                  <option value="other">＃その他</option>
+                </select>
+                <button id="addIdeaBtn" class="primary-btn">＋追加</button>
+              </div>
+              <div id="ideaLibraryList" class="idea-library-list"></div>
+            </div>
+
+            <!-- アイデア追加モーダル（インライン） -->
+            <div id="ideaAddForm" class="card" style="display: none;">
+              <div class="card-title">新しいアイデアを追加</div>
+              <div class="field-label">
+                <span>カテゴリ</span>
+                <select id="newIdeaCategory" class="idea-category-select">
+                  <option value="failure">＃自分の失敗</option>
+                  <option value="aruaru">＃〇〇のあるある</option>
+                  <option value="thinking">＃考え方</option>
+                  <option value="knowledge">＃教養</option>
+                  <option value="other">＃その他</option>
+                </select>
+              </div>
+              <div class="field-label">
+                <span>内容</span>
+                <textarea id="newIdeaContent" rows="3" placeholder="アイデアやトーク種を入力..."></textarea>
+              </div>
+              <div class="modal-actions">
+                <button id="cancelIdeaBtn" class="sub-btn">キャンセル</button>
+                <div class="flex-spacer"></div>
+                <button id="saveIdeaBtn" class="primary-btn">保存</button>
+              </div>
+            </div>
+
             <div class="card">
               <div class="card-title">アカウント</div>
               <div class="card-sub" id="loginStatusLabel">
@@ -169,7 +206,7 @@
                 <button id="googleLoginBtn" class="primary-btn">
                   Google でログイン
                 </button>
-                <button id="googleLogoutBtn" class="sub-btn">
+                <button id="googleLogoutBtn" class="sub-btn" style="display: none;">
                   ログアウト
                 </button>
               </div>
@@ -198,7 +235,7 @@
         <button id="tabCalendar" class="tab-btn tab-active">カレンダー</button>
         <button id="tabEdit" class="tab-btn">閲覧・編集</button>
         <button id="tabSearch" class="tab-btn">検索</button>
-        <button id="tabSettings" class="tab-btn">設定</button>
+        <button id="tabSettings" class="tab-btn">管理</button>
       </nav>
     </div>
 

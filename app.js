@@ -12,7 +12,17 @@
 
   // ---- 定数・ユーティリティ ----
   const STORAGE_KEY = "zezehibi.diary.v1";
+  const IDEAS_STORAGE_KEY = "zezehibi.ideas.v1";
+  const AUTH_STORAGE_KEY = "zezehibi.auth.v1";
   const WJP = ["日", "月", "火", "水", "木", "金", "土"];
+  
+  const IDEA_CATEGORIES = {
+    failure: "＃自分の失敗",
+    aruaru: "＃〇〇のあるある",
+    thinking: "＃考え方",
+    knowledge: "＃教養",
+    other: "＃その他"
+  };
 
   const $ = (id) => document.getElementById(id);
 
@@ -28,14 +38,6 @@
     const dt = new Date(y, m - 1, d);
     const w = WJP[dt.getDay()];
     return `${m}月${d}日(${w})`;
-  }
-
-  function formatTopToday(dt) {
-    const y = dt.getFullYear();
-    const m = dt.getMonth() + 1;
-    const d = dt.getDate();
-    const w = WJP[dt.getDay()];
-    return `${y}年${m}月${d}日(${w})`;
   }
 
   function esc(s) {
@@ -55,6 +57,8 @@
 
   // ---- データ管理 ----
   let db = loadDB();
+  let ideasDB = loadIdeasDB();
+  let authState = loadAuthState();
   let state = {
     currentDate: todayISO(),
     viewYear: new Date().getFullYear(),
@@ -78,6 +82,63 @@
 
   function saveDB() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+  }
+  
+  // アイデアライブラリのデータ管理
+  function loadIdeasDB() {
+    try {
+      const raw = localStorage.getItem(IDEAS_STORAGE_KEY);
+      if (!raw) return { ideas: [] };
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed.ideas)) {
+        return { ideas: [] };
+      }
+      return parsed;
+    } catch (e) {
+      console.warn("loadIdeasDB failed", e);
+      return { ideas: [] };
+    }
+  }
+  
+  function saveIdeasDB() {
+    localStorage.setItem(IDEAS_STORAGE_KEY, JSON.stringify(ideasDB));
+  }
+  
+  function addIdea(category, content) {
+    const idea = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+      category,
+      content,
+      createdAt: Date.now()
+    };
+    ideasDB.ideas.push(idea);
+    saveIdeasDB();
+    return idea;
+  }
+  
+  function deleteIdea(id) {
+    ideasDB.ideas = ideasDB.ideas.filter(i => i.id !== id);
+    saveIdeasDB();
+  }
+  
+  function getIdeasByCategory(category) {
+    if (category === "all") return ideasDB.ideas;
+    return ideasDB.ideas.filter(i => i.category === category);
+  }
+  
+  // 認証状態の管理
+  function loadAuthState() {
+    try {
+      const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+      if (!raw) return { isLoggedIn: false, user: null };
+      return JSON.parse(raw);
+    } catch (e) {
+      return { isLoggedIn: false, user: null };
+    }
+  }
+  
+  function saveAuthState() {
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authState));
   }
 
   function getEntry(date) {
@@ -163,10 +224,9 @@
 
   // ---- カレンダー描画 ----
   const calendarGrid = $("calendarGrid");
-  const prevMonthBtn = $("prevMonthBtn"); // HTMLのIDを修正
-  const nextMonthBtn = $("nextMonthBtn"); // HTMLのIDを修正
+  const prevMonthBtn = $("prevMonthBtn");
+  const nextMonthBtn = $("nextMonthBtn");
   const monthLabel = $("monthLabel");
-  const topTodayLabel = $("topTodayLabel"); // HTMLのIDを修正
 
   function renderCalendar() {
     const year = state.viewYear;
@@ -174,9 +234,6 @@
 
     // 月ラベル
     monthLabel.textContent = `${year}年 ${month}月`;
-
-    // 今日ラベル
-    topTodayLabel.textContent = formatTopToday(new Date());
 
     // カレンダーグリッドを生成（7x6固定）
     calendarGrid.innerHTML = "";
@@ -472,17 +529,148 @@
 
   searchInput.addEventListener("input", renderSearchResults);
 
-  // ---- 設定：Googleログイン（ダミー）・エクスポート・インポート ----
+  // ---- 管理：ログイン・エクスポート・インポート・アイデアライブラリ ----
   const googleLoginBtn = $("googleLoginBtn");
+  const googleLogoutBtn = $("googleLogoutBtn");
+  const loginStatusLabel = $("loginStatusLabel");
   const exportBtn = $("exportBtn");
-  const importFile = $("importFile"); // HTMLのIDを修正
+  const importFile = $("importFile");
+  
+  // アイデアライブラリ関連の要素
+  const ideaCategorySelect = $("ideaCategorySelect");
+  const addIdeaBtn = $("addIdeaBtn");
+  const ideaLibraryList = $("ideaLibraryList");
+  const ideaAddForm = $("ideaAddForm");
+  const newIdeaCategory = $("newIdeaCategory");
+  const newIdeaContent = $("newIdeaContent");
+  const cancelIdeaBtn = $("cancelIdeaBtn");
+  const saveIdeaBtn = $("saveIdeaBtn");
+  
+  // ログイン状態を更新
+  function updateLoginUI() {
+    if (authState.isLoggedIn && authState.user) {
+      loginStatusLabel.textContent = `ログイン中: ${authState.user.email}`;
+      googleLoginBtn.style.display = "none";
+      googleLogoutBtn.style.display = "inline-block";
+    } else {
+      loginStatusLabel.textContent = "未ログイン";
+      googleLoginBtn.style.display = "inline-block";
+      googleLogoutBtn.style.display = "none";
+    }
+  }
 
   googleLoginBtn.addEventListener("click", () => {
-    alert("Googleログイン／同期は今後 Firebase 連携で実装予定です。いまはローカル保存のみです。");
+    // シンプルなローカルログイン（実際のGoogleログインの代わり）
+    const email = prompt("メールアドレスを入力してください（ローカル保存用）:");
+    if (email && email.trim()) {
+      authState.isLoggedIn = true;
+      authState.user = { 
+        email: email.trim(),
+        loginAt: Date.now()
+      };
+      saveAuthState();
+      updateLoginUI();
+      alert("ログインしました。データはローカルに安全に保存されます。");
+    }
+  });
+  
+  googleLogoutBtn.addEventListener("click", () => {
+    if (confirm("ログアウトしますか？（データはローカルに残ります）")) {
+      authState.isLoggedIn = false;
+      authState.user = null;
+      saveAuthState();
+      updateLoginUI();
+    }
+  });
+  
+  // アイデアライブラリの描画
+  function renderIdeaLibrary() {
+    const category = ideaCategorySelect.value;
+    const ideas = getIdeasByCategory(category);
+    
+    ideaLibraryList.innerHTML = "";
+    
+    if (ideas.length === 0) {
+      const emptyMsg = document.createElement("div");
+      emptyMsg.className = "card-sub";
+      emptyMsg.textContent = "まだアイデアがありません。＋追加ボタンで追加できます。";
+      ideaLibraryList.appendChild(emptyMsg);
+      return;
+    }
+    
+    ideas.sort((a, b) => b.createdAt - a.createdAt).forEach(idea => {
+      const item = document.createElement("div");
+      item.className = "idea-item";
+      
+      const header = document.createElement("div");
+      header.className = "idea-item-header";
+      
+      const badge = document.createElement("span");
+      badge.className = `idea-category-badge ${idea.category}`;
+      badge.textContent = IDEA_CATEGORIES[idea.category] || idea.category;
+      
+      const actions = document.createElement("div");
+      actions.className = "idea-item-actions";
+      
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "idea-delete-btn";
+      deleteBtn.textContent = "削除";
+      deleteBtn.addEventListener("click", () => {
+        if (confirm("このアイデアを削除しますか？")) {
+          deleteIdea(idea.id);
+          renderIdeaLibrary();
+        }
+      });
+      
+      actions.appendChild(deleteBtn);
+      header.appendChild(badge);
+      header.appendChild(actions);
+      
+      const content = document.createElement("div");
+      content.className = "idea-item-content";
+      content.textContent = idea.content;
+      
+      item.appendChild(header);
+      item.appendChild(content);
+      ideaLibraryList.appendChild(item);
+    });
+  }
+  
+  ideaCategorySelect.addEventListener("change", renderIdeaLibrary);
+  
+  addIdeaBtn.addEventListener("click", () => {
+    ideaAddForm.style.display = "block";
+    newIdeaContent.value = "";
+    newIdeaContent.focus();
+  });
+  
+  cancelIdeaBtn.addEventListener("click", () => {
+    ideaAddForm.style.display = "none";
+    newIdeaContent.value = "";
+  });
+  
+  saveIdeaBtn.addEventListener("click", () => {
+    const category = newIdeaCategory.value;
+    const content = newIdeaContent.value.trim();
+    
+    if (!content) {
+      alert("内容を入力してください。");
+      return;
+    }
+    
+    addIdea(category, content);
+    ideaAddForm.style.display = "none";
+    newIdeaContent.value = "";
+    renderIdeaLibrary();
   });
 
   exportBtn.addEventListener("click", () => {
-    const blob = new Blob([JSON.stringify(db, null, 2)], {
+    // エクスポートにアイデアライブラリも含める
+    const exportData = {
+      entries: db.entries,
+      ideas: ideasDB.ideas
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
       type: "application/json",
     });
     const url = URL.createObjectURL(blob);
@@ -503,17 +691,30 @@
     reader.onload = (e) => {
       try {
         const imported = JSON.parse(e.target.result);
-        if (!imported.entries || typeof imported.entries !== "object") {
-          alert("インポート形式が不正です。");
-          return;
+        
+        // 日記エントリのインポート
+        if (imported.entries && typeof imported.entries === "object") {
+          db.entries = {
+            ...db.entries,
+            ...imported.entries,
+          };
+          saveDB();
         }
-        // 既存とマージ（同じ日付は上書き）
-        db.entries = {
-          ...db.entries,
-          ...imported.entries,
-        };
-        saveDB();
+        
+        // アイデアのインポート
+        if (Array.isArray(imported.ideas)) {
+          // 既存のアイデアとマージ（IDで重複排除）
+          const existingIds = new Set(ideasDB.ideas.map(i => i.id));
+          imported.ideas.forEach(idea => {
+            if (!existingIds.has(idea.id)) {
+              ideasDB.ideas.push(idea);
+            }
+          });
+          saveIdeasDB();
+        }
+        
         renderCalendar();
+        renderIdeaLibrary();
         alert("インポート完了しました。");
       } catch (err) {
         console.error(err);
@@ -534,6 +735,8 @@
 
     renderCalendar();
     renderEditScreen();
+    updateLoginUI();
+    renderIdeaLibrary();
     
     // アプリ起動時はカレンダー画面を表示
     showScreen("calendar");

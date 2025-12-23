@@ -5,7 +5,7 @@
    - 壊れにくいフェッチ戦略
    ========================================= */
 
-const VERSION = 'v1.0.0-' + (self.registration?.scope || '');
+const VERSION = 'v2.0.0-' + (self.registration?.scope || '');
 const CACHE_NAME = `journal-cache-${VERSION}`;
 
 /* PWAのアプリシェル（先読みキャッシュ） */
