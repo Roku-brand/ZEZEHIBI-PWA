@@ -13,15 +13,27 @@
   // ---- 定数・ユーティリティ ----
   const STORAGE_KEY = "zezehibi.diary.v1";
   const IDEAS_STORAGE_KEY = "zezehibi.ideas.v1";
+  const CATEGORIES_STORAGE_KEY = "zezehibi.categories.v1";
   const AUTH_STORAGE_KEY = "zezehibi.auth.v1";
   const WJP = ["日", "月", "火", "水", "木", "金", "土"];
   
-  const IDEA_CATEGORIES = {
+  // デフォルトカテゴリ（編集不可）
+  const DEFAULT_CATEGORIES = {
     failure: "＃自分の失敗",
     aruaru: "＃〇〇のあるある",
     thinking: "＃考え方",
     knowledge: "＃教養",
     other: "＃その他"
+  };
+  
+  // カテゴリの色設定
+  const CATEGORY_COLORS = {
+    failure: { bg: "#FEE2E2", text: "#991B1B" },
+    aruaru: { bg: "#FEF3C7", text: "#92400E" },
+    thinking: { bg: "#DBEAFE", text: "#1E40AF" },
+    knowledge: { bg: "#D1FAE5", text: "#065F46" },
+    other: { bg: "#E5E7EB", text: "#374151" },
+    custom: { bg: "#F3E8FF", text: "#6B21A8" }
   };
 
   const $ = (id) => document.getElementById(id);
@@ -58,11 +70,14 @@
   // ---- データ管理 ----
   let db = loadDB();
   let ideasDB = loadIdeasDB();
+  let categoriesDB = loadCategoriesDB();
   let authState = loadAuthState();
   let state = {
     currentDate: todayISO(),
     viewYear: new Date().getFullYear(),
     viewMonth: new Date().getMonth() + 1,
+    libraryOpen: false,
+    selectedCategory: "all"
   };
 
   function loadDB() {
@@ -102,6 +117,73 @@
   
   function saveIdeasDB() {
     localStorage.setItem(IDEAS_STORAGE_KEY, JSON.stringify(ideasDB));
+  }
+  
+  // カテゴリのデータ管理
+  function loadCategoriesDB() {
+    try {
+      const raw = localStorage.getItem(CATEGORIES_STORAGE_KEY);
+      if (!raw) return { categories: {} };
+      const parsed = JSON.parse(raw);
+      if (!parsed.categories || typeof parsed.categories !== "object") {
+        return { categories: {} };
+      }
+      return parsed;
+    } catch (e) {
+      console.warn("loadCategoriesDB failed", e);
+      return { categories: {} };
+    }
+  }
+  
+  function saveCategoriesDB() {
+    localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categoriesDB));
+  }
+  
+  // 全カテゴリを取得（デフォルト + カスタム）
+  function getAllCategories() {
+    return { ...DEFAULT_CATEGORIES, ...categoriesDB.categories };
+  }
+  
+  // カテゴリ名を取得
+  function getCategoryName(categoryId) {
+    const all = getAllCategories();
+    return all[categoryId] || categoryId;
+  }
+  
+  // カテゴリがデフォルトかどうか
+  function isDefaultCategory(categoryId) {
+    return Object.prototype.hasOwnProperty.call(DEFAULT_CATEGORIES, categoryId);
+  }
+  
+  // カスタムカテゴリを追加
+  function addCategory(name) {
+    const id = "custom_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    categoriesDB.categories[id] = "＃" + name;
+    saveCategoriesDB();
+    return id;
+  }
+  
+  // カテゴリ名を編集
+  function editCategory(categoryId, newName) {
+    if (isDefaultCategory(categoryId)) return false;
+    categoriesDB.categories[categoryId] = "＃" + newName;
+    saveCategoriesDB();
+    return true;
+  }
+  
+  // カテゴリを削除
+  function deleteCategory(categoryId) {
+    if (isDefaultCategory(categoryId)) return false;
+    delete categoriesDB.categories[categoryId];
+    saveCategoriesDB();
+    // このカテゴリに属するアイデアを「その他」に移動
+    ideasDB.ideas.forEach(idea => {
+      if (idea.category === categoryId) {
+        idea.category = "other";
+      }
+    });
+    saveIdeasDB();
+    return true;
   }
   
   function addIdea(category, content) {
@@ -537,6 +619,12 @@
   const importFile = $("importFile");
   
   // アイデアライブラリ関連の要素
+  const ideaLibraryHeader = $("ideaLibraryHeader");
+  const ideaLibraryToggle = $("ideaLibraryToggle");
+  const ideaLibraryBody = $("ideaLibraryBody");
+  const ideaCategoryList = $("ideaCategoryList");
+  const newCategoryName = $("newCategoryName");
+  const addCategoryBtn = $("addCategoryBtn");
   const ideaCategorySelect = $("ideaCategorySelect");
   const addIdeaBtn = $("addIdeaBtn");
   const ideaLibraryList = $("ideaLibraryList");
@@ -545,6 +633,15 @@
   const newIdeaContent = $("newIdeaContent");
   const cancelIdeaBtn = $("cancelIdeaBtn");
   const saveIdeaBtn = $("saveIdeaBtn");
+  
+  // ライブラリの開閉
+  function toggleIdeaLibrary() {
+    state.libraryOpen = !state.libraryOpen;
+    ideaLibraryBody.style.display = state.libraryOpen ? "block" : "none";
+    ideaLibraryToggle.classList.toggle("open", state.libraryOpen);
+  }
+  
+  ideaLibraryHeader.addEventListener("click", toggleIdeaLibrary);
   
   // ログイン状態を更新
   function updateLoginUI() {
@@ -590,9 +687,123 @@
     }
   });
   
+  // カテゴリセレクトの更新
+  function updateCategorySelects() {
+    const categories = getAllCategories();
+    const optionsHtml = '<option value="all">すべて</option>' +
+      Object.entries(categories).map(([id, name]) => 
+        `<option value="${esc(id)}">${esc(name)}</option>`
+      ).join('');
+    
+    ideaCategorySelect.innerHTML = optionsHtml;
+    ideaCategorySelect.value = state.selectedCategory;
+    
+    // 新規追加用のセレクト（「すべて」は不要）
+    const newIdeaOptionsHtml = Object.entries(categories).map(([id, name]) => 
+      `<option value="${esc(id)}">${esc(name)}</option>`
+    ).join('');
+    newIdeaCategory.innerHTML = newIdeaOptionsHtml;
+  }
+  
+  // カテゴリチップのCSSクラスを取得
+  function getCategoryChipClass(categoryId) {
+    if (isDefaultCategory(categoryId)) return categoryId;
+    return "custom";
+  }
+  
+  // カテゴリリストの描画
+  function renderCategoryList() {
+    const categories = getAllCategories();
+    ideaCategoryList.innerHTML = "";
+    
+    Object.entries(categories).forEach(([id, name]) => {
+      const chip = document.createElement("div");
+      chip.className = `idea-category-chip ${getCategoryChipClass(id)}`;
+      if (id === state.selectedCategory) {
+        chip.classList.add("selected");
+      }
+      
+      const chipName = document.createElement("span");
+      chipName.className = "idea-category-chip-name";
+      chipName.textContent = name;
+      chip.appendChild(chipName);
+      
+      // カスタムカテゴリの場合は編集・削除ボタンを追加
+      if (!isDefaultCategory(id)) {
+        const editBtn = document.createElement("span");
+        editBtn.className = "idea-category-chip-edit";
+        editBtn.textContent = "✏️";
+        editBtn.title = "編集";
+        editBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const currentName = name.replace(/^＃/, "");
+          const newName = prompt("カテゴリ名を入力:", currentName);
+          if (newName && newName.trim()) {
+            editCategory(id, newName.trim());
+            renderCategoryList();
+            updateCategorySelects();
+            renderIdeaLibrary();
+          }
+        });
+        
+        const deleteBtn = document.createElement("span");
+        deleteBtn.className = "idea-category-chip-delete";
+        deleteBtn.textContent = "×";
+        deleteBtn.title = "削除";
+        deleteBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (confirm(`「${name}」を削除しますか？\n（このカテゴリのアイデアは「その他」に移動されます）`)) {
+            deleteCategory(id);
+            if (state.selectedCategory === id) {
+              state.selectedCategory = "all";
+            }
+            renderCategoryList();
+            updateCategorySelects();
+            renderIdeaLibrary();
+          }
+        });
+        
+        chip.appendChild(editBtn);
+        chip.appendChild(deleteBtn);
+      }
+      
+      // チップクリックでフィルター
+      chip.addEventListener("click", () => {
+        state.selectedCategory = id;
+        ideaCategorySelect.value = id;
+        renderCategoryList();
+        renderIdeaLibrary();
+      });
+      
+      ideaCategoryList.appendChild(chip);
+    });
+  }
+  
+  // カテゴリ追加ボタン
+  addCategoryBtn.addEventListener("click", () => {
+    const name = newCategoryName.value.trim();
+    if (!name) {
+      alert("カテゴリ名を入力してください。");
+      return;
+    }
+    addCategory(name);
+    newCategoryName.value = "";
+    renderCategoryList();
+    updateCategorySelects();
+  });
+  
+  // Enterキーでカテゴリ追加
+  newCategoryName.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addCategoryBtn.click();
+    }
+  });
+  
   // アイデアライブラリの描画
   function renderIdeaLibrary() {
     const category = ideaCategorySelect.value;
+    state.selectedCategory = category;
     const ideas = getIdeasByCategory(category);
     
     ideaLibraryList.innerHTML = "";
@@ -613,8 +824,9 @@
       header.className = "idea-item-header";
       
       const badge = document.createElement("span");
-      badge.className = `idea-category-badge ${idea.category}`;
-      badge.textContent = IDEA_CATEGORIES[idea.category] || idea.category;
+      const badgeClass = isDefaultCategory(idea.category) ? idea.category : "custom";
+      badge.className = `idea-category-badge ${badgeClass}`;
+      badge.textContent = getCategoryName(idea.category);
       
       const actions = document.createElement("div");
       actions.className = "idea-item-actions";
@@ -672,10 +884,11 @@
   });
 
   exportBtn.addEventListener("click", () => {
-    // エクスポートにアイデアライブラリも含める
+    // エクスポートにアイデアライブラリとカテゴリも含める
     const exportData = {
       entries: db.entries,
-      ideas: ideasDB.ideas
+      ideas: ideasDB.ideas,
+      categories: categoriesDB.categories
     };
     const blob = new Blob([JSON.stringify(exportData, null, 2)], {
       type: "application/json",
@@ -708,6 +921,16 @@
           saveDB();
         }
         
+        // カテゴリのインポート
+        if (imported.categories && typeof imported.categories === "object") {
+          Object.entries(imported.categories).forEach(([id, name]) => {
+            if (id && name && !isDefaultCategory(id)) {
+              categoriesDB.categories[id] = String(name);
+            }
+          });
+          saveCategoriesDB();
+        }
+        
         // アイデアのインポート
         if (Array.isArray(imported.ideas)) {
           // 既存のアイデアとマージ（IDで重複排除）
@@ -729,6 +952,8 @@
         }
         
         renderCalendar();
+        renderCategoryList();
+        updateCategorySelects();
         renderIdeaLibrary();
         alert("インポート完了しました。");
       } catch (err) {
@@ -751,6 +976,8 @@
     renderCalendar();
     renderEditScreen();
     updateLoginUI();
+    updateCategorySelects();
+    renderCategoryList();
     renderIdeaLibrary();
     
     // アプリ起動時はカレンダー画面を表示

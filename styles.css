@@ -554,6 +554,195 @@ body {
 }
 
 /* ===== アイデアライブラリ ===== */
+
+/* ライブラリカード本体 */
+.idea-library-card {
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(47, 111, 89, 0.2);
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8FAF9 100%);
+  box-shadow: 0 8px 24px rgba(47, 111, 89, 0.1);
+}
+
+/* ヘッダー部分（クリック可能） */
+.idea-library-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--accent) 0%, #3D8B72 100%);
+  color: #FFFFFF;
+  transition: background 0.2s;
+}
+
+.idea-library-header:hover {
+  background: linear-gradient(135deg, #256B52 0%, #2F6F59 100%);
+}
+
+.idea-library-header-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.idea-library-icon {
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+.idea-library-header-text .card-title {
+  color: #FFFFFF;
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+
+.idea-library-header-text .card-sub {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 10px;
+}
+
+.idea-library-toggle {
+  font-size: 14px;
+  transition: transform 0.3s ease;
+}
+
+.idea-library-toggle.open {
+  transform: rotate(180deg);
+}
+
+/* ライブラリ本体 */
+.idea-library-body {
+  padding: 12px 14px;
+  max-height: 350px;
+  overflow-y: auto;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+/* セクション共通 */
+.idea-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 8px;
+  padding-left: 2px;
+}
+
+/* カテゴリセクション */
+.idea-category-section {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed rgba(148, 163, 184, 0.3);
+}
+
+.idea-category-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.idea-category-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.idea-category-chip.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(47, 111, 89, 0.2);
+}
+
+.idea-category-chip-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.idea-category-chip-edit {
+  font-size: 10px;
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.idea-category-chip-edit:hover {
+  opacity: 1;
+}
+
+.idea-category-chip-delete {
+  font-size: 10px;
+  opacity: 0.6;
+  cursor: pointer;
+  margin-left: 2px;
+}
+
+.idea-category-chip-delete:hover {
+  opacity: 1;
+  color: var(--danger);
+}
+
+/* カテゴリの色分け */
+.idea-category-chip.failure { background: #FEE2E2; color: #991B1B; }
+.idea-category-chip.aruaru { background: #FEF3C7; color: #92400E; }
+.idea-category-chip.thinking { background: #DBEAFE; color: #1E40AF; }
+.idea-category-chip.knowledge { background: #D1FAE5; color: #065F46; }
+.idea-category-chip.other { background: #E5E7EB; color: #374151; }
+.idea-category-chip.custom { background: #F3E8FF; color: #6B21A8; }
+
+/* カテゴリ追加 */
+.idea-category-add {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.idea-category-input {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: #FFFFFF;
+  color: var(--text-main);
+  font-size: 11px;
+}
+
+.idea-category-add-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  border: none;
+  background: var(--accent);
+  color: #FFFFFF;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.idea-category-add-btn:hover {
+  background: #256B52;
+}
+
+/* アイデアリストセクション */
+.idea-list-section {
+  /* No extra styles needed */
+}
+
 .idea-library-controls {
   display: flex;
   gap: 8px;
@@ -575,19 +764,26 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 300px;
+  max-height: 200px;
   overflow-y: auto;
 }
 
 .idea-item {
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: var(--bg-card-soft);
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #FFFFFF 0%, var(--bg-card-soft) 100%);
   border: 1px solid rgba(148, 163, 184, 0.2);
   font-size: 11px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.idea-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .idea-item-header {
@@ -597,7 +793,7 @@ body {
 }
 
 .idea-category-badge {
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 999px;
   font-size: 9px;
   font-weight: 600;
@@ -608,10 +804,12 @@ body {
 .idea-category-badge.thinking { background: #DBEAFE; color: #1E40AF; }
 .idea-category-badge.knowledge { background: #D1FAE5; color: #065F46; }
 .idea-category-badge.other { background: #E5E7EB; color: #374151; }
+.idea-category-badge.custom { background: #F3E8FF; color: #6B21A8; }
 
 .idea-item-content {
   color: var(--text-main);
-  line-height: 1.4;
+  line-height: 1.5;
+  padding: 4px 0;
 }
 
 .idea-item-actions {
@@ -621,13 +819,27 @@ body {
 }
 
 .idea-delete-btn {
-  padding: 3px 8px;
+  padding: 4px 10px;
   border: none;
   border-radius: 6px;
   font-size: 10px;
   background: #FEE2E2;
   color: #991B1B;
   cursor: pointer;
+  transition: background 0.2s;
+}
+
+.idea-delete-btn:hover {
+  background: #FECACA;
+}
+
+/* カテゴリ編集モーダル */
+.idea-category-edit-input {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--accent);
+  font-size: 10px;
+  max-width: 100px;
 }
 
 /* 管理画面のスクロール対応 */

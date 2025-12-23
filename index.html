@@ -154,23 +154,39 @@
 
           <div class="card-list scroll-section">
             <!-- アイデア・トーク種ライブラリ -->
-            <div class="card">
-              <div class="card-title">アイデア・トーク種ライブラリ</div>
-              <div class="card-sub">
-                アイデアやトーク種をカテゴリ別に管理できます。
+            <div class="card idea-library-card">
+              <div class="idea-library-header" id="ideaLibraryHeader">
+                <div class="idea-library-header-content">
+                  <div class="idea-library-icon">💡</div>
+                  <div class="idea-library-header-text">
+                    <div class="card-title">アイデア・トーク種ライブラリ</div>
+                    <div class="card-sub">タップしてカテゴリを表示</div>
+                  </div>
+                </div>
+                <div class="idea-library-toggle" id="ideaLibraryToggle">▼</div>
               </div>
-              <div class="idea-library-controls">
-                <select id="ideaCategorySelect" class="idea-category-select">
-                  <option value="all">すべて</option>
-                  <option value="failure">＃自分の失敗</option>
-                  <option value="aruaru">＃〇〇のあるある</option>
-                  <option value="thinking">＃考え方</option>
-                  <option value="knowledge">＃教養</option>
-                  <option value="other">＃その他</option>
-                </select>
-                <button id="addIdeaBtn" class="primary-btn">＋追加</button>
+              
+              <div class="idea-library-body" id="ideaLibraryBody" style="display: none;">
+                <!-- カテゴリ管理 -->
+                <div class="idea-category-section">
+                  <div class="idea-section-title">カテゴリ一覧</div>
+                  <div id="ideaCategoryList" class="idea-category-list"></div>
+                  <div class="idea-category-add">
+                    <input type="text" id="newCategoryName" class="idea-category-input" placeholder="新しいカテゴリ名">
+                    <button id="addCategoryBtn" class="idea-category-add-btn">＋</button>
+                  </div>
+                </div>
+                
+                <!-- アイデアリスト -->
+                <div class="idea-list-section">
+                  <div class="idea-section-title">アイデア一覧</div>
+                  <div class="idea-library-controls">
+                    <select id="ideaCategorySelect" class="idea-category-select"></select>
+                    <button id="addIdeaBtn" class="primary-btn">＋追加</button>
+                  </div>
+                  <div id="ideaLibraryList" class="idea-library-list"></div>
+                </div>
               </div>
-              <div id="ideaLibraryList" class="idea-library-list"></div>
             </div>
 
             <!-- アイデア追加モーダル（インライン） -->
@@ -178,13 +194,7 @@
               <div class="card-title">新しいアイデアを追加</div>
               <div class="field-label">
                 <span>カテゴリ</span>
-                <select id="newIdeaCategory" class="idea-category-select">
-                  <option value="failure">＃自分の失敗</option>
-                  <option value="aruaru">＃〇〇のあるある</option>
-                  <option value="thinking">＃考え方</option>
-                  <option value="knowledge">＃教養</option>
-                  <option value="other">＃その他</option>
-                </select>
+                <select id="newIdeaCategory" class="idea-category-select"></select>
               </div>
               <div class="field-label">
                 <span>内容</span>
