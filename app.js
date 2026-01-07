@@ -28,10 +28,16 @@
 
   const $ = (id) => document.getElementById(id);
 
+  // Convert a Date object to local YYYY-MM-DD string (avoiding UTC timezone issues)
+  function toLocalISODateString(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
   function todayISO() {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d.toISOString().slice(0, 10);
+    return toLocalISODateString(new Date());
   }
 
   function isoToJP(iso) {
@@ -320,7 +326,7 @@
       const d = new Date(startDate);
       d.setDate(startDate.getDate() + i);
 
-      const cellIso = d.toISOString().slice(0, 10);
+      const cellIso = toLocalISODateString(d);
       const cellMonth = d.getMonth() + 1;
       const cellDay = d.getDate();
       const dow = d.getDay();
@@ -885,7 +891,7 @@
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    const stamp = new Date().toISOString().slice(0, 10);
+    const stamp = toLocalISODateString(new Date());
     a.href = url;
     a.download = `zezehibi-export-${stamp}.json`;
     document.body.appendChild(a);
