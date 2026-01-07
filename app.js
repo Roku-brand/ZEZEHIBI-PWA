@@ -39,7 +39,7 @@
     const [y, m, d] = iso.split("-").map(Number);
     const dt = new Date(y, m - 1, d);
     const w = WJP[dt.getDay()];
-    return `${m}月${d}日(${w})`;
+    return `${y}年${m}月${d}日(${w})`;
   }
 
   function esc(s) {
@@ -432,8 +432,8 @@
 
   function renderEditScreen() {
     const date = state.currentDate;
-    editDateLabel.textContent = date;
-    editDateSub.textContent = isoToJP(date);
+    editDateLabel.textContent = isoToJP(date);
+    editDateSub.textContent = date;
 
     const entry = getEntry(date);
     if (entry) {
