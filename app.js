@@ -237,6 +237,7 @@
       title: partial.title ?? prev.title ?? "",
       body: partial.body ?? prev.body ?? "",
       idea: partial.idea ?? prev.idea ?? "",
+      photo: partial.photo ?? prev.photo ?? null,
       updatedAt: now,
     };
     saveDB();
@@ -435,6 +436,15 @@
   const deleteEntryBtn = $("deleteEntryBtn");
   const saveEntryBtn = $("saveEntryBtn"); // ★追加：HTMLにIDを追加
   const saveStatus = $("saveStatus"); // ★追加：HTMLにIDを追加
+  
+  // 写真関連の要素
+  const photoInput = $("photoInput");
+  const photoPreview = $("photoPreview");
+  const addPhotoBtn = $("addPhotoBtn");
+  const removePhotoBtn = $("removePhotoBtn");
+  
+  // 一時的な写真データ（保存前の状態を保持）
+  let currentPhoto = null;
 
   function renderEditScreen() {
     const date = state.currentDate;
@@ -452,6 +462,7 @@
       editTitle.value = entry.title || "";
       editBody.value = entry.body || "";
       editIdea.value = entry.idea || "";
+      currentPhoto = entry.photo || null;
       deleteEntryBtn.disabled = false;
     } else {
       editWake.value = "";
@@ -463,10 +474,104 @@
       editTitle.value = "";
       editBody.value = "";
       editIdea.value = "";
+      currentPhoto = null;
       deleteEntryBtn.disabled = true;
     }
+    renderPhotoPreview();
     saveStatus.textContent = "未保存";
   }
+  
+  // 写真プレビューの描画
+  function renderPhotoPreview() {
+    photoPreview.innerHTML = "";
+    if (currentPhoto) {
+      const item = document.createElement("div");
+      item.className = "photo-preview-item";
+      const img = document.createElement("img");
+      img.src = currentPhoto;
+      img.alt = "写真";
+      item.appendChild(img);
+      photoPreview.appendChild(item);
+      removePhotoBtn.style.display = "inline-block";
+    } else {
+      removePhotoBtn.style.display = "none";
+    }
+  }
+  
+  // 写真追加ボタンのクリック
+  addPhotoBtn.addEventListener("click", () => {
+    photoInput.click();
+  });
+  
+  // 写真ファイル選択時の処理
+  photoInput.addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    
+    // ファイルサイズチェック（5MB以下に制限）
+    if (file.size > 5 * 1024 * 1024) {
+      alert("画像ファイルは5MB以下にしてください。");
+      photoInput.value = "";
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      // 画像をリサイズして保存（ストレージ容量削減のため）
+      resizeImage(event.target.result, 800, 800, (resizedDataUrl) => {
+        currentPhoto = resizedDataUrl;
+        renderPhotoPreview();
+        saveStatus.textContent = "未保存";
+      });
+    };
+    reader.onerror = () => {
+      alert("画像の読み込みに失敗しました。");
+      photoInput.value = "";
+    };
+    reader.readAsDataURL(file);
+    photoInput.value = ""; // 同じファイルを再選択可能にする
+  });
+  
+  // 画像リサイズ関数
+  function resizeImage(dataUrl, maxWidth, maxHeight, callback) {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      
+      // アスペクト比を維持してリサイズ
+      if (width > maxWidth || height > maxHeight) {
+        const ratio = Math.min(maxWidth / width, maxHeight / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+      
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        alert("画像の処理に失敗しました。");
+        return;
+      }
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      // JPEG形式で圧縮（品質0.8）
+      callback(canvas.toDataURL("image/jpeg", 0.8));
+    };
+    img.onerror = () => {
+      alert("画像の読み込みに失敗しました。");
+    };
+    img.src = dataUrl;
+  }
+  
+  // 写真削除ボタンのクリック
+  removePhotoBtn.addEventListener("click", () => {
+    if (confirm("写真を削除しますか？")) {
+      currentPhoto = null;
+      renderPhotoPreview();
+      saveStatus.textContent = "未保存";
+    }
+  });
 
   // 「今日」ボタンの処理
   editDateTodayBtn.addEventListener("click", () => {
@@ -498,6 +603,7 @@
       title: editTitle.value.trim(),
       body: editBody.value.trim(),
       idea: editIdea.value.trim(),
+      photo: currentPhoto,
     });
     renderCalendar();
     saveStatus.textContent = "保存しました";

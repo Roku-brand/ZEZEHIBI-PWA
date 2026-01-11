@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>是々日々</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <link rel="manifest" href="manifest.webmanifest" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -120,6 +120,18 @@
                 placeholder="思いついたアイデアや話したいことのメモ"
               ></textarea>
             </label>
+
+            <div class="field-label">
+              <span>写真</span>
+              <div class="photo-upload-area">
+                <input type="file" id="photoInput" accept="image/*" capture="environment" style="display: none" />
+                <div id="photoPreview" class="photo-preview"></div>
+                <div class="photo-buttons">
+                  <button type="button" id="addPhotoBtn" class="sub-btn">📷 写真を追加</button>
+                  <button type="button" id="removePhotoBtn" class="danger-btn" style="display: none">🗑 削除</button>
+                </div>
+              </div>
+            </div>
 
             <div class="modal-actions">
               <button type="button" id="deleteEntryBtn" class="danger-btn">
