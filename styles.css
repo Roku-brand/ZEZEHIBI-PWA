@@ -420,8 +420,15 @@ body {
 
 .meals-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr;
   gap: 6px;
+}
+
+/* 3列レイアウト: 画面幅が十分な場合のみ */
+@media (min-width: 420px) {
+  .meals-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .meals-grid .field-label {
