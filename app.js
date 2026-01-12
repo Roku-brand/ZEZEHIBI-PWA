@@ -19,11 +19,11 @@
   
   // デフォルトカテゴリ（編集不可）
   const DEFAULT_CATEGORIES = {
-    failure: "＃自分の失敗",
-    aruaru: "＃〇〇のあるある",
-    thinking: "＃考え方",
-    knowledge: "＃教養",
-    other: "＃その他"
+    failure: { name: "＃自分の失敗", definition: "痛みを次の判断材料に" },
+    aruaru: { name: "＃〇〇のあるある", definition: "共感を生むネタの種" },
+    thinking: { name: "＃考え方", definition: "思考の型を言語化する" },
+    knowledge: { name: "＃教養", definition: "会話を深める雑学メモ" },
+    other: { name: "＃その他", definition: "分類前のアイデア置き場" }
   };
 
   const $ = (id) => document.getElementById(id);
@@ -135,7 +135,10 @@
     localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categoriesDB));
   }
   
-  // 全カテゴリを取得（デフォルト + カスタム）
+  /**
+   * 全カテゴリを取得（デフォルト + カスタム）
+   * デフォルトカテゴリは { name, definition } 形式、カスタムは文字列
+   */
   function getAllCategories() {
     return { ...DEFAULT_CATEGORIES, ...categoriesDB.categories };
   }
@@ -143,7 +146,18 @@
   // カテゴリ名を取得
   function getCategoryName(categoryId) {
     const all = getAllCategories();
-    return all[categoryId] || categoryId;
+    const cat = all[categoryId];
+    if (!cat) return categoryId;
+    // デフォルトカテゴリはオブジェクト形式
+    if (typeof cat === "object" && cat.name) return cat.name;
+    // カスタムカテゴリは文字列
+    return cat;
+  }
+  
+  // カテゴリ定義を取得（デフォルトカテゴリのみ）
+  function getCategoryDefinition(categoryId) {
+    const cat = DEFAULT_CATEGORIES[categoryId];
+    return cat?.definition || "";
   }
   
   // カテゴリがデフォルトかどうか
@@ -843,16 +857,16 @@
   function updateCategorySelects() {
     const categories = getAllCategories();
     const optionsHtml = '<option value="all">すべて</option>' +
-      Object.entries(categories).map(([id, name]) => 
-        `<option value="${esc(id)}">${esc(name)}</option>`
+      Object.keys(categories).map((id) => 
+        `<option value="${esc(id)}">${esc(getCategoryName(id))}</option>`
       ).join('');
     
     ideaCategorySelect.innerHTML = optionsHtml;
     ideaCategorySelect.value = state.selectedCategory;
     
     // 新規追加用のセレクト（「すべて」は不要）
-    const newIdeaOptionsHtml = Object.entries(categories).map(([id, name]) => 
-      `<option value="${esc(id)}">${esc(name)}</option>`
+    const newIdeaOptionsHtml = Object.keys(categories).map((id) => 
+      `<option value="${esc(id)}">${esc(getCategoryName(id))}</option>`
     ).join('');
     newIdeaCategory.innerHTML = newIdeaOptionsHtml;
   }
@@ -868,17 +882,34 @@
     const categories = getAllCategories();
     ideaCategoryList.innerHTML = "";
     
-    Object.entries(categories).forEach(([id, name]) => {
+    Object.entries(categories).forEach(([id, catData]) => {
+      const name = getCategoryName(id);
+      const definition = getCategoryDefinition(id);
+      
       const chip = document.createElement("div");
       chip.className = `idea-category-chip ${getCategoryChipClass(id)}`;
       if (id === state.selectedCategory) {
         chip.classList.add("selected");
       }
       
+      // カテゴリ名とテキストコンテナ
+      const chipTextContainer = document.createElement("div");
+      chipTextContainer.className = "idea-category-chip-text";
+      
       const chipName = document.createElement("span");
       chipName.className = "idea-category-chip-name";
       chipName.textContent = name;
-      chip.appendChild(chipName);
+      chipTextContainer.appendChild(chipName);
+      
+      // 定義がある場合は表示
+      if (definition) {
+        const chipDef = document.createElement("span");
+        chipDef.className = "idea-category-chip-def";
+        chipDef.textContent = definition;
+        chipTextContainer.appendChild(chipDef);
+      }
+      
+      chip.appendChild(chipTextContainer);
       
       // カスタムカテゴリの場合は編集・削除ボタンを追加
       if (!isDefaultCategory(id)) {

@@ -776,8 +776,8 @@ body {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 5px 10px;
-  border-radius: 999px;
+  padding: 6px 12px;
+  border-radius: 12px;
   font-size: 10px;
   font-weight: 500;
   cursor: pointer;
@@ -790,8 +790,25 @@ body {
   box-shadow: 0 0 0 2px rgba(47, 111, 89, 0.2);
 }
 
+.idea-category-chip-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .idea-category-chip-name {
-  max-width: 120px;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.idea-category-chip-def {
+  font-size: 9px;
+  opacity: 0.8;
+  font-weight: 400;
+  max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
