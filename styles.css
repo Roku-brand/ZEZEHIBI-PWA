@@ -251,6 +251,43 @@ body {
   -webkit-line-clamp: 3;
 }
 
+/* タイトルがある場合は黒文字で下線 */
+.day-tags.has-title {
+  color: var(--text-main);
+  text-decoration: underline;
+}
+
+/* 充実度バッジ（カレンダーセル右下） */
+.day-satisfaction {
+  position: absolute;
+  bottom: 2px;
+  right: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.day-satisfaction.satisfaction-a {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.day-satisfaction.satisfaction-b {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.day-satisfaction.satisfaction-c {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
 /* 選択日サマリ（カレンダーの直下に固定） */
 .day-summary {
   margin: 0 0 6px;
@@ -534,10 +571,29 @@ body {
 .editor-header {
   padding: 10px 8px 8px;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.2);
   margin-bottom: 10px;
+}
+
+.editor-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editor-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.save-status {
+  font-size: 10px;
+  color: var(--text-sub);
 }
 
 .editor-date {
@@ -553,6 +609,64 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+/* 体重ピッカー */
+.weight-picker {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: #FFFFFF;
+  color: var(--text-main);
+  font-size: 11px;
+}
+
+/* 充実度ピッカー */
+.satisfaction-picker {
+  display: flex;
+  gap: 8px;
+}
+
+.satisfaction-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: #FFFFFF;
+  color: var(--text-main);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.satisfaction-btn:hover {
+  background: var(--bg-card-soft);
+}
+
+.satisfaction-btn.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.satisfaction-btn[data-value="A"].selected {
+  background: #D1FAE5;
+  color: #065F46;
+  border-color: #065F46;
+}
+
+.satisfaction-btn[data-value="B"].selected {
+  background: #FEF3C7;
+  color: #92400E;
+  border-color: #92400E;
+}
+
+.satisfaction-btn[data-value="C"].selected {
+  background: #FEE2E2;
+  color: #991B1B;
+  border-color: #991B1B;
 }
 
 /* ===== 検索結果グリッド ===== */

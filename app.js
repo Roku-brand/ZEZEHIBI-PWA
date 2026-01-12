@@ -237,6 +237,7 @@
       title: partial.title ?? prev.title ?? "",
       body: partial.body ?? prev.body ?? "",
       idea: partial.idea ?? prev.idea ?? "",
+      satisfaction: partial.satisfaction ?? prev.satisfaction ?? "",
       photo: partial.photo ?? prev.photo ?? null,
       updatedAt: now,
     };
@@ -364,6 +365,7 @@
         // タイトルがあればそれを表示、なければデフォルトの情報を表示
         if (entry.title) {
           tags.textContent = entry.title;
+          tags.classList.add("has-title");
         } else {
           const parts = [];
           if (entry.wake) parts.push(`☀${entry.wake}`);
@@ -384,6 +386,14 @@
 
       cell.appendChild(dayNum);
       cell.appendChild(tags);
+
+      // 充実度バッジ（右下に表示）
+      if (entry && entry.satisfaction) {
+        const satisfactionBadge = document.createElement("div");
+        satisfactionBadge.className = "day-satisfaction satisfaction-" + entry.satisfaction.toLowerCase();
+        satisfactionBadge.textContent = entry.satisfaction;
+        cell.appendChild(satisfactionBadge);
+      }
 
       // クリックで日付選択（&編集画面へ）
       cell.addEventListener("click", () => {
@@ -422,20 +432,20 @@
 
   // ---- 閲覧・編集画面 ----
   const editDateLabel = $("editDateLabel");
-  const editDateSub = $("editDateSub"); // ★追加：HTMLに要素を追加
-  const editWake = $("editWake"); // HTMLのIDを修正
+  const editWake = $("editWake");
   const editWeight = $("editWeight");
-  const editBreakfast = $("editBreakfast"); // HTMLのIDを修正
-  const editLunch = $("editLunch"); // HTMLのIDを修正
-  const editDinner = $("editDinner"); // HTMLのIDを修正
-  const editNews = $("editNews"); // HTMLのIDを修正
-  const editTitle = $("editTitle"); // ★追加：タイトル入力欄
-  const editBody = $("editBody"); // HTMLのIDを修正
+  const editBreakfast = $("editBreakfast");
+  const editLunch = $("editLunch");
+  const editDinner = $("editDinner");
+  const editNews = $("editNews");
+  const editTitle = $("editTitle");
+  const editBody = $("editBody");
   const editIdea = $("editIdea");
-  const editDateTodayBtn = $("editDateTodayBtn"); // ★追加：HTMLに要素を追加
+  const editDateTodayBtn = $("editDateTodayBtn");
   const deleteEntryBtn = $("deleteEntryBtn");
-  const saveEntryBtn = $("saveEntryBtn"); // ★追加：HTMLにIDを追加
-  const saveStatus = $("saveStatus"); // ★追加：HTMLにIDを追加
+  const saveEntryBtn = $("saveEntryBtn");
+  const saveStatus = $("saveStatus");
+  const satisfactionPicker = $("satisfactionPicker");
   
   // 写真関連の要素
   const photoInput = $("photoInput");
@@ -445,16 +455,60 @@
   
   // 一時的な写真データ（保存前の状態を保持）
   let currentPhoto = null;
+  // 現在の充実度
+  let currentSatisfaction = "";
+
+  // 体重ピッカーの初期化（30.0 〜 150.0kg、0.5刻み、デフォルト55.0）
+  function initWeightPicker() {
+    editWeight.innerHTML = '<option value="">--</option>';
+    for (let w = 30.0; w <= 150.0; w += 0.5) {
+      const wStr = w.toFixed(1);
+      const opt = document.createElement("option");
+      opt.value = wStr;
+      opt.textContent = wStr + " kg";
+      // Use numeric comparison to avoid floating-point string issues
+      if (Math.abs(w - 55.0) < 0.001) {
+        opt.selected = true;
+      }
+      editWeight.appendChild(opt);
+    }
+  }
+
+  // 充実度ボタンの選択状態を更新
+  function updateSatisfactionButtons() {
+    const buttons = satisfactionPicker.querySelectorAll(".satisfaction-btn");
+    buttons.forEach(btn => {
+      if (btn.dataset.value === currentSatisfaction) {
+        btn.classList.add("selected");
+      } else {
+        btn.classList.remove("selected");
+      }
+    });
+  }
+
+  // 充実度ボタンのクリックイベント
+  satisfactionPicker.addEventListener("click", (e) => {
+    if (e.target.classList.contains("satisfaction-btn")) {
+      const value = e.target.dataset.value;
+      // 同じボタンを再クリックで選択解除
+      if (currentSatisfaction === value) {
+        currentSatisfaction = "";
+      } else {
+        currentSatisfaction = value;
+      }
+      updateSatisfactionButtons();
+      saveStatus.textContent = "未保存";
+    }
+  });
 
   function renderEditScreen() {
     const date = state.currentDate;
     editDateLabel.textContent = isoToJP(date);
-    editDateSub.textContent = date;
 
     const entry = getEntry(date);
     if (entry) {
       editWake.value = entry.wake || "";
-      editWeight.value = entry.weight || "";
+      editWeight.value = entry.weight || "55.0";
       editBreakfast.value = entry.breakfast || "";
       editLunch.value = entry.lunch || "";
       editDinner.value = entry.dinner || "";
@@ -462,11 +516,12 @@
       editTitle.value = entry.title || "";
       editBody.value = entry.body || "";
       editIdea.value = entry.idea || "";
+      currentSatisfaction = entry.satisfaction || "";
       currentPhoto = entry.photo || null;
       deleteEntryBtn.disabled = false;
     } else {
       editWake.value = "";
-      editWeight.value = "";
+      editWeight.value = "55.0";
       editBreakfast.value = "";
       editLunch.value = "";
       editDinner.value = "";
@@ -474,9 +529,11 @@
       editTitle.value = "";
       editBody.value = "";
       editIdea.value = "";
+      currentSatisfaction = "";
       currentPhoto = null;
       deleteEntryBtn.disabled = true;
     }
+    updateSatisfactionButtons();
     renderPhotoPreview();
     saveStatus.textContent = "未保存";
   }
@@ -584,15 +641,7 @@
 
   saveEntryBtn.addEventListener("click", () => {
     const date = state.currentDate;
-    const weightValue = editWeight.value.trim();
-    // Validate weight: must be empty or a valid non-negative number
-    if (weightValue) {
-      const weightNum = Number(weightValue);
-      if (!isFinite(weightNum) || weightNum < 0) {
-        alert("体重は0以上の数値を入力してください。");
-        return;
-      }
-    }
+    const weightValue = editWeight.value;
     upsertEntry(date, {
       wake: editWake.value.trim(),
       weight: weightValue,
@@ -603,6 +652,7 @@
       title: editTitle.value.trim(),
       body: editBody.value.trim(),
       idea: editIdea.value.trim(),
+      satisfaction: currentSatisfaction,
       photo: currentPhoto,
     });
     renderCalendar();
@@ -1075,6 +1125,7 @@
     state.viewYear = t.getFullYear();
     state.viewMonth = t.getMonth() + 1;
 
+    initWeightPicker();
     renderCalendar();
     renderEditScreen();
     updateLoginUI();
