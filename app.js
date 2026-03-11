@@ -28,6 +28,14 @@
 
   const $ = (id) => document.getElementById(id);
 
+  function hideSplashScreen() {
+    const splash = $("splashScreen");
+    if (!splash) return;
+    splash.classList.add("is-hidden");
+    splash.setAttribute("aria-hidden", "true");
+    setTimeout(() => splash.remove(), 320);
+  }
+
   // Convert a Date object to local YYYY-MM-DD string (avoiding UTC timezone issues)
   function toLocalISODateString(date) {
     const y = date.getFullYear();
@@ -1143,6 +1151,7 @@
     
     // アプリ起動時はカレンダー画面を表示
     showScreen("calendar");
+    hideSplashScreen();
   }
 
   document.addEventListener("DOMContentLoaded", init);

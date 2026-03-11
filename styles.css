@@ -47,6 +47,40 @@ body {
   overscroll-behavior-y: contain;
 }
 
+
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: linear-gradient(to bottom, #F8FAF9 0%, #F2F6F3 40%, #EDF3EF 100%);
+  transition: opacity 0.3s ease;
+}
+
+.splash-screen.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash-icon {
+  width: 92px;
+  height: 92px;
+  border-radius: 22px;
+  box-shadow: var(--shadow-soft);
+}
+
+.splash-message {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--text-main);
+}
+
 /* ルート全体を縦フレックスにして「画面いっぱい」使う */
 .app-root {
   min-height: 100vh;
