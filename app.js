@@ -441,7 +441,9 @@
   const editTitle = $("editTitle");
   const editBody = $("editBody");
   const editIdea = $("editIdea");
+  const editPrevDayBtn = $("editPrevDayBtn");
   const editDateTodayBtn = $("editDateTodayBtn");
+  const editNextDayBtn = $("editNextDayBtn");
   const deleteEntryBtn = $("deleteEntryBtn");
   const saveEntryBtn = $("saveEntryBtn");
   const saveStatus = $("saveStatus");
@@ -630,6 +632,23 @@
     }
   });
 
+  function moveCurrentDateByDays(days) {
+    const [year, month, day] = state.currentDate.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+    date.setDate(date.getDate() + days);
+
+    state.currentDate = toLocalISODateString(date);
+    state.viewYear = date.getFullYear();
+    state.viewMonth = date.getMonth() + 1;
+    renderCalendar();
+    renderEditScreen();
+  }
+
+  // 「前日」ボタンの処理
+  editPrevDayBtn.addEventListener("click", () => {
+    moveCurrentDateByDays(-1);
+  });
+
   // 「今日」ボタンの処理
   editDateTodayBtn.addEventListener("click", () => {
     state.currentDate = todayISO();
@@ -637,6 +656,11 @@
     state.viewMonth = new Date().getMonth() + 1;
     renderCalendar();
     renderEditScreen();
+  });
+
+  // 「翌日」ボタンの処理
+  editNextDayBtn.addEventListener("click", () => {
+    moveCurrentDateByDays(1);
   });
 
   saveEntryBtn.addEventListener("click", () => {

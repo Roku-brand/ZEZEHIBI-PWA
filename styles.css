@@ -591,6 +591,13 @@ body {
   gap: 6px;
 }
 
+
+.edit-date-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .save-status {
   font-size: 10px;
   color: var(--text-sub);
