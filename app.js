@@ -361,25 +361,9 @@
       tags.className = "day-tags";
 
       const entry = getEntry(cellIso);
-      if (entry) {
-        // タイトルがあればそれを表示、なければデフォルトの情報を表示
-        if (entry.title) {
-          tags.textContent = entry.title;
-          tags.classList.add("has-title");
-        } else {
-          const parts = [];
-          if (entry.wake) parts.push(`☀${entry.wake}`);
-          if (entry.weight) parts.push(formatWeight(entry.weight));
-          if (entry.breakfast) parts.push("朝: " + entry.breakfast);
-          if (entry.lunch) parts.push("昼: " + entry.lunch);
-          if (entry.dinner) parts.push("夜: " + entry.dinner);
-          if (entry.news) parts.push("📰 " + entry.news);
-          if (entry.idea) parts.push("💡 " + entry.idea);
-          if (!parts.length && entry.body) {
-            parts.push(entry.body.slice(0, 30));
-          }
-          tags.textContent = parts.join(" / ");
-        }
+      if (entry && entry.title) {
+        tags.textContent = entry.title;
+        tags.classList.add("has-title");
       } else {
         tags.textContent = "";
       }
