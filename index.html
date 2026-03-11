@@ -234,6 +234,37 @@
             </div>
 
             <div class="card">
+              <div class="card-title">通知設定</div>
+              <div class="card-sub">指定した時刻に、日記を書くリマインド通知を表示します。</div>
+              <div class="notification-row">
+                <span>通知をONにする</span>
+                <label class="switch" for="notificationEnabled">
+                  <input type="checkbox" id="notificationEnabled" />
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+              <div class="notification-grid">
+                <label class="field-label">
+                  <span>通知時刻</span>
+                  <input type="time" id="notificationTime" value="21:00" />
+                </label>
+                <label class="field-label">
+                  <span>通知メッセージ</span>
+                  <input
+                    type="text"
+                    id="notificationMessage"
+                    maxlength="80"
+                    placeholder="例：今日の出来事を一言だけでも残そう"
+                  />
+                </label>
+              </div>
+              <div class="modal-actions">
+                <button id="saveNotificationBtn" class="primary-btn">通知設定を保存</button>
+              </div>
+              <div class="card-sub" id="notificationStatusLabel">通知はOFFです。</div>
+            </div>
+
+            <div class="card">
               <div class="card-title">アカウント</div>
               <div class="card-sub" id="loginStatusLabel">
                 未ログイン

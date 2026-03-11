@@ -126,6 +126,25 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    (async () => {
+      const clientList = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+      for (const client of clientList) {
+        if ('focus' in client) {
+          await client.focus();
+          return;
+        }
+      }
+      if (clients.openWindow) {
+        await clients.openWindow('./index.html');
+      }
+    })()
+  );
+});
+
 /* ---- 即時反映用（任意）：skipWaiting メッセージ ---- */
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') {
