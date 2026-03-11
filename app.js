@@ -15,6 +15,8 @@
   const IDEAS_STORAGE_KEY = "zezehibi.ideas.v1";
   const CATEGORIES_STORAGE_KEY = "zezehibi.categories.v1";
   const AUTH_STORAGE_KEY = "zezehibi.auth.v1";
+  const NOTIFICATION_STORAGE_KEY = "zezehibi.notification.v1";
+  const NOTIFICATION_RUNTIME_KEY = "zezehibi.notification.runtime.v1";
   const WJP = ["日", "月", "火", "水", "木", "金", "土"];
   
   // デフォルトカテゴリ（編集不可）
@@ -76,6 +78,8 @@
   let ideasDB = loadIdeasDB();
   let categoriesDB = loadCategoriesDB();
   let authState = loadAuthState();
+  let notificationState = loadNotificationState();
+  let notificationTimerId = null;
   let state = {
     currentDate: todayISO(),
     viewYear: new Date().getFullYear(),
@@ -225,6 +229,29 @@
   
   function saveAuthState() {
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authState));
+  }
+
+  // 通知設定の管理
+  function loadNotificationState() {
+    try {
+      const raw = localStorage.getItem(NOTIFICATION_STORAGE_KEY);
+      if (!raw) {
+        return { enabled: false, time: "21:00", message: "今日の日記を記録しましょう。" };
+      }
+      const parsed = JSON.parse(raw);
+      return {
+        enabled: Boolean(parsed.enabled),
+        time: typeof parsed.time === "string" && parsed.time ? parsed.time : "21:00",
+        message: typeof parsed.message === "string" && parsed.message ? parsed.message : "今日の日記を記録しましょう。",
+      };
+    } catch (e) {
+      console.warn("loadNotificationState failed", e);
+      return { enabled: false, time: "21:00", message: "今日の日記を記録しましょう。" };
+    }
+  }
+
+  function saveNotificationState() {
+    localStorage.setItem(NOTIFICATION_STORAGE_KEY, JSON.stringify(notificationState));
   }
 
   function getEntry(date) {
@@ -778,6 +805,11 @@
   const loginStatusLabel = $("loginStatusLabel");
   const exportBtn = $("exportBtn");
   const importFile = $("importFile");
+  const notificationEnabled = $("notificationEnabled");
+  const notificationTime = $("notificationTime");
+  const notificationMessage = $("notificationMessage");
+  const saveNotificationBtn = $("saveNotificationBtn");
+  const notificationStatusLabel = $("notificationStatusLabel");
   
   // アイデアライブラリ関連の要素
   const ideaLibraryHeader = $("ideaLibraryHeader");
@@ -848,6 +880,116 @@
     }
   });
   
+  function getNotificationStatusText() {
+    if (!notificationState.enabled) return "通知はOFFです。";
+    return `毎日 ${notificationState.time} に通知します。`;
+  }
+
+  function renderNotificationUI() {
+    notificationEnabled.checked = notificationState.enabled;
+    notificationTime.value = notificationState.time || "21:00";
+    notificationMessage.value = notificationState.message || "今日の日記を記録しましょう。";
+    notificationStatusLabel.textContent = getNotificationStatusText();
+  }
+
+  async function requestNotificationPermissionIfNeeded() {
+    if (!("Notification" in window)) {
+      alert("この端末は通知機能に対応していません。");
+      return false;
+    }
+    if (Notification.permission === "granted") return true;
+    if (Notification.permission === "denied") {
+      alert("通知が拒否されています。iPhoneの設定から通知を許可してください。");
+      return false;
+    }
+    const result = await Notification.requestPermission();
+    if (result !== "granted") {
+      alert("通知の許可が必要です。設定から通知をONにしてください。");
+      return false;
+    }
+    return true;
+  }
+
+  saveNotificationBtn.addEventListener("click", async () => {
+    const timeValue = notificationTime.value || "21:00";
+    const messageValue = notificationMessage.value.trim() || "今日の日記を記録しましょう。";
+    const enabledValue = notificationEnabled.checked;
+
+    if (enabledValue) {
+      const ok = await requestNotificationPermissionIfNeeded();
+      if (!ok) {
+        notificationEnabled.checked = false;
+        return;
+      }
+    }
+
+    notificationState = {
+      enabled: enabledValue,
+      time: timeValue,
+      message: messageValue,
+    };
+    saveNotificationState();
+    renderNotificationUI();
+    startNotificationScheduler();
+
+    alert(enabledValue ? "通知設定を保存しました。" : "通知をOFFにしました。");
+  });
+
+  function loadNotificationRuntime() {
+    try {
+      return JSON.parse(localStorage.getItem(NOTIFICATION_RUNTIME_KEY) || "{}");
+    } catch (_) {
+      return {};
+    }
+  }
+
+  function saveNotificationRuntime(runtime) {
+    localStorage.setItem(NOTIFICATION_RUNTIME_KEY, JSON.stringify(runtime));
+  }
+
+  async function fireDiaryNotification(message) {
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    const text = message || "今日の日記を記録しましょう。";
+
+    if (navigator.serviceWorker) {
+      const registration = await navigator.serviceWorker.ready;
+      await registration.showNotification("是々日々", {
+        body: text,
+        icon: "./icon-192.png",
+        badge: "./icon-192.png",
+      });
+      return;
+    }
+
+    new Notification("是々日々", { body: text });
+  }
+
+  async function checkAndNotify() {
+    if (!notificationState.enabled) return;
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+    const now = new Date();
+    const today = toLocalISODateString(now);
+    const [h, m] = (notificationState.time || "21:00").split(":").map(Number);
+    const minutesNow = now.getHours() * 60 + now.getMinutes();
+    const targetMinutes = (h || 0) * 60 + (m || 0);
+
+    const runtime = loadNotificationRuntime();
+    if (runtime.lastNotifiedDate === today) return;
+
+    if (minutesNow >= targetMinutes) {
+      await fireDiaryNotification(notificationState.message);
+      saveNotificationRuntime({ lastNotifiedDate: today });
+      notificationStatusLabel.textContent = `${getNotificationStatusText()} 本日は通知済みです。`;
+    }
+  }
+
+  function startNotificationScheduler() {
+    checkAndNotify();
+    if (notificationTimerId) clearInterval(notificationTimerId);
+    notificationTimerId = setInterval(checkAndNotify, 30000);
+  }
+
   // カテゴリセレクトの更新
   function updateCategorySelects() {
     const categories = getAllCategories();
@@ -1138,6 +1280,8 @@
     renderCalendar();
     renderEditScreen();
     updateLoginUI();
+    renderNotificationUI();
+    startNotificationScheduler();
     updateCategorySelects();
     renderCategoryList();
     renderIdeaLibrary();
