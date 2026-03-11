@@ -264,11 +264,12 @@
     db.entries[date] = {
       date,
       wake: partial.wake ?? prev.wake ?? "",
+      bed: partial.bed ?? prev.bed ?? "",
       weight: partial.weight ?? prev.weight ?? "",
       breakfast: partial.breakfast ?? prev.breakfast ?? "",
       lunch: partial.lunch ?? prev.lunch ?? "",
       dinner: partial.dinner ?? prev.dinner ?? "",
-      news: partial.news ?? prev.news ?? "",
+      weather: partial.weather ?? prev.weather ?? prev.news ?? "",
       title: partial.title ?? prev.title ?? "",
       body: partial.body ?? prev.body ?? "",
       idea: partial.idea ?? prev.idea ?? "",
@@ -452,11 +453,12 @@
   // ---- 閲覧・編集画面 ----
   const editDateLabel = $("editDateLabel");
   const editWake = $("editWake");
+  const editBed = $("editBed");
   const editWeight = $("editWeight");
   const editBreakfast = $("editBreakfast");
   const editLunch = $("editLunch");
   const editDinner = $("editDinner");
-  const editNews = $("editNews");
+  const editWeather = $("editWeather");
   const editTitle = $("editTitle");
   const editBody = $("editBody");
   const editIdea = $("editIdea");
@@ -528,11 +530,12 @@
     const entry = getEntry(date);
     if (entry) {
       editWake.value = entry.wake || "";
+      editBed.value = entry.bed || "";
       editWeight.value = entry.weight || "55.0";
       editBreakfast.value = entry.breakfast || "";
       editLunch.value = entry.lunch || "";
       editDinner.value = entry.dinner || "";
-      editNews.value = entry.news || "";
+      editWeather.value = entry.weather || entry.news || "";
       editTitle.value = entry.title || "";
       editBody.value = entry.body || "";
       editIdea.value = entry.idea || "";
@@ -541,11 +544,12 @@
       deleteEntryBtn.disabled = false;
     } else {
       editWake.value = "";
+      editBed.value = "";
       editWeight.value = "55.0";
       editBreakfast.value = "";
       editLunch.value = "";
       editDinner.value = "";
-      editNews.value = "";
+      editWeather.value = "";
       editTitle.value = "";
       editBody.value = "";
       editIdea.value = "";
@@ -680,11 +684,12 @@
     const weightValue = editWeight.value;
     upsertEntry(date, {
       wake: editWake.value.trim(),
+      bed: editBed.value.trim(),
       weight: weightValue,
       breakfast: editBreakfast.value.trim(),
       lunch: editLunch.value.trim(),
       dinner: editDinner.value.trim(),
-      news: editNews.value.trim(),
+      weather: editWeather.value.trim(),
       title: editTitle.value.trim(),
       body: editBody.value.trim(),
       idea: editIdea.value.trim(),
@@ -735,11 +740,12 @@
         [
           e.date,
           e.wake,
+          e.bed,
           e.weight,
           e.breakfast,
           e.lunch,
           e.dinner,
-          e.news,
+          e.weather || e.news,
           e.title,
           e.body,
           e.idea,
@@ -771,11 +777,12 @@
         sub.className = "card-sub";
         const summaryParts = [];
         if (e.wake) summaryParts.push(`☀${e.wake}`);
+        if (e.bed) summaryParts.push(`🌙${e.bed}`);
         if (e.weight) summaryParts.push(formatWeight(e.weight));
         if (e.breakfast) summaryParts.push("朝:" + e.breakfast);
         if (e.lunch) summaryParts.push("昼:" + e.lunch);
         if (e.dinner) summaryParts.push("夜:" + e.dinner);
-        if (e.news) summaryParts.push("📰" + e.news);
+        if (e.weather || e.news) summaryParts.push("☁️" + (e.weather || e.news));
         if (e.idea) summaryParts.push("💡" + e.idea);
         if (summaryParts.length === 0 && e.body) {
           summaryParts.push(e.body.slice(0, 40));

@@ -64,52 +64,6 @@
           </div>
 
           <form id="diaryForm" class="editor-form">
-            <div class="grid-2">
-              <label class="field-label">
-                <span>起床時間</span>
-                <input type="time" id="editWake" />
-              </label>
-
-              <label class="field-label">
-                <span>体重 (kg)</span>
-                <select id="editWeight" class="weight-picker"></select>
-              </label>
-            </div>
-
-            <div class="meals-grid">
-              <label class="field-label">
-                <span>朝</span>
-                <input
-                  type="text"
-                  id="editBreakfast" placeholder="例：トースト"
-                />
-              </label>
-
-              <label class="field-label">
-                <span>昼</span>
-                <input
-                  type="text"
-                  id="editLunch" placeholder="例：定食"
-                />
-              </label>
-
-              <label class="field-label">
-                <span>夜</span>
-                <input
-                  type="text"
-                  id="editDinner" placeholder="例：カレー"
-                />
-              </label>
-            </div>
-
-            <label class="field-label">
-              <span>今日の注目ニュース / トピック</span>
-              <textarea
-                id="editNews" rows="2"
-                placeholder="気になったニュース・出来事をメモ"
-              ></textarea>
-            </label>
-
             <label class="field-label">
               <span>タイトル</span>
               <input
@@ -125,6 +79,61 @@
                 id="editBody" rows="6"
                 placeholder="一日の出来事や気づきを自由に書いてください"
               ></textarea>
+            </label>
+
+            <div class="field-label">
+              <span>ごはん</span>
+              <div class="meals-grid">
+                <label class="field-label">
+                  <span>朝</span>
+                  <input
+                    type="text"
+                    id="editBreakfast" placeholder="例：トースト"
+                  />
+                </label>
+
+                <label class="field-label">
+                  <span>昼</span>
+                  <input
+                    type="text"
+                    id="editLunch" placeholder="例：定食"
+                  />
+                </label>
+
+                <label class="field-label">
+                  <span>夜</span>
+                  <input
+                    type="text"
+                    id="editDinner" placeholder="例：カレー"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <label class="field-label">
+                <span>起床時間</span>
+                <input type="time" id="editWake" />
+              </label>
+
+              <label class="field-label">
+                <span>就寝時間</span>
+                <input type="time" id="editBed" />
+              </label>
+            </div>
+
+            <label class="field-label">
+              <span>体重 (kg)</span>
+              <select id="editWeight" class="weight-picker"></select>
+            </label>
+
+            <label class="field-label">
+              <span>天気</span>
+              <input
+                type="text"
+                id="editWeather"
+                placeholder="例：晴れ / 雨"
+              />
             </label>
 
             <label class="field-label">
