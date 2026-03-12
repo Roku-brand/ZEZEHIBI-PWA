@@ -702,7 +702,8 @@ body {
 }
 
 /* 体重ピッカー */
-.weight-picker {
+.weight-picker,
+.weather-picker {
   width: 100%;
   padding: 6px 8px;
   border-radius: 10px;
