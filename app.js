@@ -480,20 +480,33 @@
   // 現在の充実度
   let currentSatisfaction = "";
 
-  // 体重ピッカーの初期化（30.0 〜 150.0kg、0.5刻み、デフォルト55.0）
+  // 体重ピッカーの初期化（30.0 〜 150.0kg、0.1刻み、デフォルト55.0）
   function initWeightPicker() {
     editWeight.innerHTML = '<option value="">--</option>';
-    for (let w = 30.0; w <= 150.0; w += 0.5) {
+    for (let i = 300; i <= 1500; i += 1) {
+      const w = i / 10;
       const wStr = w.toFixed(1);
       const opt = document.createElement("option");
       opt.value = wStr;
       opt.textContent = wStr + " kg";
-      // Use numeric comparison to avoid floating-point string issues
-      if (Math.abs(w - 55.0) < 0.001) {
+      if (wStr === "55.0") {
         opt.selected = true;
       }
       editWeight.appendChild(opt);
     }
+  }
+
+  // 天気ピッカーの初期化（リール型）
+  function initWeatherPicker() {
+    const weatherOptions = ["", "晴れ", "雨", "曇り", "雪", "突風"];
+    editWeather.innerHTML = "";
+
+    weatherOptions.forEach((weather) => {
+      const opt = document.createElement("option");
+      opt.value = weather;
+      opt.textContent = weather || "--";
+      editWeather.appendChild(opt);
+    });
   }
 
   // 充実度ボタンの選択状態を更新
@@ -689,7 +702,7 @@
       breakfast: editBreakfast.value.trim(),
       lunch: editLunch.value.trim(),
       dinner: editDinner.value.trim(),
-      weather: editWeather.value.trim(),
+      weather: editWeather.value,
       title: editTitle.value.trim(),
       body: editBody.value.trim(),
       idea: editIdea.value.trim(),
@@ -1284,6 +1297,7 @@
     state.viewMonth = t.getMonth() + 1;
 
     initWeightPicker();
+    initWeatherPicker();
     renderCalendar();
     renderEditScreen();
     updateLoginUI();
