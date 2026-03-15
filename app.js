@@ -269,9 +269,10 @@
       breakfast: partial.breakfast ?? prev.breakfast ?? "",
       lunch: partial.lunch ?? prev.lunch ?? "",
       dinner: partial.dinner ?? prev.dinner ?? "",
-      weather: partial.weather ?? prev.weather ?? prev.news ?? "",
+      weather: partial.weather ?? prev.weather ?? "",
       title: partial.title ?? prev.title ?? "",
       body: partial.body ?? prev.body ?? "",
+      news: partial.news ?? prev.news ?? "",
       idea: partial.idea ?? prev.idea ?? "",
       satisfaction: partial.satisfaction ?? prev.satisfaction ?? "",
       photo: partial.photo ?? prev.photo ?? null,
@@ -461,6 +462,7 @@
   const editWeather = $("editWeather");
   const editTitle = $("editTitle");
   const editBody = $("editBody");
+  const editNews = $("editNews");
   const editIdea = $("editIdea");
   const editPrevDayBtn = $("editPrevDayBtn");
   const editNextDayBtn = $("editNextDayBtn");
@@ -548,9 +550,10 @@
       editBreakfast.value = entry.breakfast || "";
       editLunch.value = entry.lunch || "";
       editDinner.value = entry.dinner || "";
-      editWeather.value = entry.weather || entry.news || "";
+      editWeather.value = entry.weather || "";
       editTitle.value = entry.title || "";
       editBody.value = entry.body || "";
+      editNews.value = entry.news || "";
       editIdea.value = entry.idea || "";
       currentSatisfaction = entry.satisfaction || "";
       currentPhoto = entry.photo || null;
@@ -565,6 +568,7 @@
       editWeather.value = "";
       editTitle.value = "";
       editBody.value = "";
+      editNews.value = "";
       editIdea.value = "";
       currentSatisfaction = "";
       currentPhoto = null;
@@ -705,6 +709,7 @@
       weather: editWeather.value,
       title: editTitle.value.trim(),
       body: editBody.value.trim(),
+      news: editNews.value.trim(),
       idea: editIdea.value.trim(),
       satisfaction: currentSatisfaction,
       photo: currentPhoto,
@@ -758,7 +763,8 @@
           e.breakfast,
           e.lunch,
           e.dinner,
-          e.weather || e.news,
+          e.weather,
+          e.news,
           e.title,
           e.body,
           e.idea,
@@ -795,7 +801,8 @@
         if (e.breakfast) summaryParts.push("朝:" + e.breakfast);
         if (e.lunch) summaryParts.push("昼:" + e.lunch);
         if (e.dinner) summaryParts.push("夜:" + e.dinner);
-        if (e.weather || e.news) summaryParts.push("☁️" + (e.weather || e.news));
+        if (e.weather) summaryParts.push("☁️" + e.weather);
+        if (e.news) summaryParts.push("📰" + e.news);
         if (e.idea) summaryParts.push("💡" + e.idea);
         if (summaryParts.length === 0 && e.body) {
           summaryParts.push(e.body.slice(0, 40));
