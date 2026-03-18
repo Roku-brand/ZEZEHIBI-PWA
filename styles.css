@@ -118,6 +118,7 @@ body {
   padding: 0 8px 0;
   display: flex;
   position: relative;
+  min-height: 0;
 }
 
 /* 画面切り替え共通 */
@@ -622,6 +623,61 @@ body {
   font-weight: 600;
 }
 
+/* ===== 戦闘UI（モバイル最適化） ===== */
+#screenBattle,
+.battle-screen {
+  width: 100%;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+#battleViewport,
+.battle-viewport,
+.battle-field {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#battleControls,
+.battle-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* スピードアップをミサイル発射の上へ */
+#speedUpBtn,
+.speed-up-btn {
+  order: 1;
+}
+
+#missileLaunchBtn,
+.missile-launch-btn {
+  order: 2;
+}
+
+@media (max-width: 768px) {
+  .main-area {
+    height: calc(100dvh - 84px - env(safe-area-inset-bottom, 0px));
+    overflow: hidden;
+  }
+
+  #screenBattle,
+  .battle-screen {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  #battleViewport,
+  .battle-viewport,
+  .battle-field {
+    max-height: 100%;
+  }
+}
+
 /* スクロールバー非表示（モバイル向け） */
 ::-webkit-scrollbar {
   width: 0;
@@ -1104,5 +1160,4 @@ body {
   padding: 8px 14px;
   font-size: 12px;
 }
-
 
