@@ -5,7 +5,7 @@
    - 壊れにくいフェッチ戦略
    ========================================= */
 
-const VERSION = 'v2.0.0-' + (self.registration?.scope || '');
+const VERSION = 'v2.0.1';
 const CACHE_NAME = `journal-cache-${VERSION}`;
 
 /* PWAのアプリシェル（先読みキャッシュ） */
@@ -16,9 +16,9 @@ const APP_SHELL = [
   './app.js',
   './offline.html',
   './manifest.webmanifest',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/apple-touch-icon.png',
+  './icon-192.png',
+  './icon-512.png',
+  './apple-touch-icon.png',
 ];
 
 /* ---- インストール：アプリシェルをキャッシュ ---- */
